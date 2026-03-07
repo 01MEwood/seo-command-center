@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import ContentStudio from "./ContentStudio.jsx";
 
 // ═══════════════════════════════════════════════════════════════
 // SCHREINERHELDEN × IHR-MÖBEL-SCHREINER
@@ -617,73 +618,9 @@ function CannibalView() {
   );
 }
 
-// ── Content Plan ──
+// ── Content Studio (imported) ──
 function ContentPlan() {
-  const [domain, setDomain] = useState("sh");
-  const plans = {
-    sh: [
-      { id: 1, title: "Einbauschrank nach Maß Kosten 2025", kw: "einbauschrank nach maß kosten", vol: 2400, pos: 8.2, status: "live", funnel: "ToFu", expert: "dean" },
-      { id: 10, title: "Aufmaß-Termin buchen", kw: "schreiner aufmaß murrhardt", vol: 40, pos: null, status: "prio", funnel: "BoFu", expert: "irwin" },
-      { id: 7, title: "Einbauschrank Dachschräge", kw: "einbauschrank dachschräge", vol: 720, pos: 12.4, status: "prio", funnel: "MoFu", expert: "ray" },
-      { id: 2, title: "Ankleide planen", kw: "ankleide planen", vol: 1900, pos: 15.7, status: "geplant", funnel: "MoFu", expert: "dunford" },
-      { id: 6, title: "Schreiner vs. IKEA PAX", kw: "schreiner vs ikea", vol: 880, pos: 18.3, status: "geplant", funnel: "MoFu", expert: "fishkin" },
-      { id: 3, title: "Schreiner Region Stuttgart", kw: "schreiner region stuttgart", vol: 390, pos: null, status: "geplant", funnel: "BoFu", expert: "barnard" },
-    ],
-    ims: [
-      { id: 102, title: "Innenausbau für Bauträger & Architekten", kw: "innenausbau gewerbe schreiner", vol: 320, pos: 14.2, status: "prio", funnel: "MoFu", expert: "irwin" },
-      { id: 104, title: "Schreinerei Murrhardt", kw: "schreinerei murrhardt", vol: 170, pos: 2.4, status: "prio", funnel: "BoFu", expert: "barnard" },
-      { id: 101, title: "Maßküche vom Schreiner", kw: "küche vom schreiner", vol: 1300, pos: 19.1, status: "geplant", funnel: "MoFu", expert: "dean" },
-      { id: 103, title: "Holztreppe vom Schreiner", kw: "holztreppe vom schreiner", vol: 480, pos: null, status: "geplant", funnel: "MoFu", expert: "king" },
-      { id: 106, title: "Schreiner für Architekten", kw: "schreiner für architekten", vol: 140, pos: 8.7, status: "geplant", funnel: "BoFu", expert: "dunford" },
-    ],
-  };
-  const d = DOMAINS[domain];
-  const items = plans[domain];
-
-  return (
-    <div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-        {Object.values(DOMAINS).map(dom => (
-          <button key={dom.id} onClick={() => setDomain(dom.id)} style={{
-            padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700,
-            background: domain === dom.id ? dom.color + "15" : "transparent",
-            border: `1px solid ${domain === dom.id ? dom.color + "40" : "#22224A"}`,
-            color: domain === dom.id ? dom.color : "#6B6B9A",
-          }}>{dom.icon} {dom.name} ({plans[dom.id].length})</button>
-        ))}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {items.map(art => {
-          const expert = EXPERTS.find(e => e.id === art.expert);
-          return (
-            <Card key={art.id} accent={art.status === "live" ? "#10B981" : art.status === "prio" ? "#EF4444" : "#3B82F6"}>
-              <div style={{ padding: "14px 24px", display: "grid", gridTemplateColumns: "50px 1fr 90px 60px 70px 60px 120px", alignItems: "center", gap: 12 }}>
-                <span style={{ color: "#6B6B9A", fontSize: 12, fontFamily: "'Space Mono', monospace", fontWeight: 700 }}>#{art.id}</span>
-                <div>
-                  <div style={{ color: "#EDEDF5", fontSize: 13, fontWeight: 700 }}>{art.title}</div>
-                  <div style={{ color: "#6B6B9A", fontSize: 11, fontFamily: "'Space Mono', monospace" }}>{art.kw}</div>
-                </div>
-                <span style={{ color: "#EDEDF5", fontSize: 12, fontWeight: 700 }}>{art.vol.toLocaleString()} <span style={{ color: "#6B6B9A", fontWeight: 400 }}>vol</span></span>
-                {art.pos ? (
-                  <Badge bg={art.pos <= 5 ? "#10B98115" : art.pos <= 10 ? "#F59E0B15" : "#EF444415"} color={art.pos <= 5 ? "#10B981" : art.pos <= 10 ? "#F59E0B" : "#EF4444"}>
-                    {art.pos.toFixed(1)}
-                  </Badge>
-                ) : <span style={{ color: "#6B6B9A", fontSize: 11 }}>—</span>}
-                <Badge bg="#22224A" color="#8888AA">{art.funnel}</Badge>
-                <Badge bg={art.status === "live" ? "#10B98115" : art.status === "prio" ? "#EF444415" : "#3B82F615"} color={art.status === "live" ? "#10B981" : art.status === "prio" ? "#EF4444" : "#3B82F6"}>
-                  {art.status.toUpperCase()}
-                </Badge>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 12 }}>{expert.icon}</span>
-                  <span style={{ color: expert.color, fontSize: 10, fontWeight: 700 }}>{expert.name.split(" ")[1]}</span>
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
-  );
+  return <ContentStudio />;
 }
 
 // ── API Hub ──
@@ -749,8 +686,96 @@ function ApiHub() {
   );
 }
 
-// ═══════ MAIN APP ═══════
-export default function SEOCommandCenterV3() {
+// ═══════ AUTH GATE ═══════
+const AUTH_HASH = "schreinerhelden2026"; // Change this to your password
+
+function LoginScreen({ onLogin }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = () => {
+    setLoading(true);
+    setTimeout(() => {
+      if (password === AUTH_HASH) {
+        sessionStorage.setItem("seo_auth", "true");
+        onLogin();
+      } else {
+        setError(true);
+        setLoading(false);
+      }
+    }, 500);
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#0A0A1B", display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Onest', -apple-system, sans-serif",
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+      <div style={{ width: 400, padding: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: 16, margin: "0 auto 20px",
+            background: "linear-gradient(135deg, #E8490F 0%, #1B7A52 100%)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 28, fontWeight: 900, color: "white", boxShadow: "0 8px 32px rgba(232,73,15,0.3)",
+          }}>⚡</div>
+          <h1 style={{ color: "#EDEDF5", fontSize: 24, fontWeight: 800, margin: 0 }}>SEO Command Center</h1>
+          <p style={{ color: "#6B6B9A", fontSize: 13, marginTop: 8 }}>Schreinerhelden × Ihr Möbel-Schreiner</p>
+        </div>
+        <div style={{
+          background: "#13132A", border: "1px solid #22224A", borderRadius: 14, padding: 28,
+        }}>
+          <div style={{ color: "#8888AA", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>PASSWORT</div>
+          <input
+            type="password"
+            value={password}
+            onChange={e => { setPassword(e.target.value); setError(false); }}
+            onKeyDown={e => e.key === "Enter" && handleLogin()}
+            placeholder="Zugangspasswort eingeben"
+            autoFocus
+            style={{
+              width: "100%", padding: "12px 16px", background: "#0A0A1B",
+              border: `1px solid ${error ? "#EF4444" : "#22224A"}`,
+              borderRadius: 8, color: "#EDEDF5", fontSize: 15, outline: "none",
+              fontFamily: "'Space Mono', monospace",
+            }}
+          />
+          {error && (
+            <div style={{ color: "#EF4444", fontSize: 12, marginTop: 8 }}>Falsches Passwort</div>
+          )}
+          <button
+            onClick={handleLogin}
+            disabled={loading || !password}
+            style={{
+              width: "100%", marginTop: 16, padding: "12px", borderRadius: 8,
+              background: loading ? "#22224A" : "linear-gradient(135deg, #E8490F, #FF6B3D)",
+              border: "none", color: "white", fontSize: 14, fontWeight: 700,
+              cursor: loading ? "wait" : "pointer", opacity: !password ? 0.5 : 1,
+            }}
+          >
+            {loading ? "Prüfe..." : "Einloggen"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════ MAIN APP WITH AUTH ═══════
+export default function App() {
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem("seo_auth") === "true");
+
+  if (!authed) {
+    return <LoginScreen onLogin={() => setAuthed(true)} />;
+  }
+
+  return <SEOCommandCenterV3 />;
+}
+
+// ═══════ MAIN DASHBOARD (was previously default export) ═══════
+function SEOCommandCenterV3() {
   const [activeTab, setActiveTab] = useState("command");
   const [collapsed, setCollapsed] = useState(false);
 
