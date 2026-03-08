@@ -2,15 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+* {
+  box-sizing: border-box;
   margin: 0;
-  background: #0A0A1B;
-  color: #EDEDF5;
-  font-family: 'Onest', sans-serif;
+  padding: 0;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0E0E22; }
-::-webkit-scrollbar-thumb { background: #22224A; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #3B3B6A; }
+body {
+  font-family: 'Outfit', 'DM Sans', system-ui, sans-serif;
+  background: #0a0a1a;
+  color: #e2e8f0;
+}
