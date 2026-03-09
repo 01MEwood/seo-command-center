@@ -1,4 +1,4 @@
-Deploy SEO Command Center v4.1
+name: Deploy SEO Command Center v4.1
 
 on:
   push:
