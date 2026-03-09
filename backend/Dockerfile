@@ -1,8 +1,8 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# Install curl for Docker healthchecks
-RUN apk add --no-cache curl openssl
+# Install curl for healthchecks + openssl for Prisma
+RUN apk add --no-cache curl openssl openssl-dev
 
 # Dependencies first (cache layer)
 COPY package*.json ./
@@ -18,5 +18,4 @@ RUN mkdir -p logs
 
 EXPOSE 4000
 
-# Use node directly for proper signal handling (not npm start)
 CMD ["node", "src/index.js"]
