@@ -1,0 +1,65 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: seo_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-seo_command}
+      POSTGRES_USER: ${DB_USER:-seoadmin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - seo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-seoadmin} -d ${DB_NAME:-seo_command}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - seo_net
+
+  backend:
+    build: ./backend
+    container_name: seo_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 4000
+      DATABASE_URL: postgresql://${DB_USER:-seoadmin}:${DB_PASSWORD:-changeme}@db:5432/${DB_NAME:-seo_command}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://seo.meosapp.de}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN:-}
+      DATAFORSEO_LOGIN: ${DATAFORSEO_LOGIN:-}
+      DATAFORSEO_PASSWORD: ${DATAFORSEO_PASSWORD:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-defaultsecret}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - seo_net
+
+  frontend:
+    build: ./frontend
+    container_name: seo_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - seo_net
+
+volumes:
+  seo_pgdata:
+
+networks:
+  seo_net:
+    driver: bridge

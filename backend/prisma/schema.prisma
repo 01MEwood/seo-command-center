@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Domains (schreinerhelden.de / ihr-moebel-schreiner.de) ──
+model Domain {
+  id        String   @id @default(cuid())
+  name      String
+  url       String   @unique
+  color     String
+  createdAt DateTime @default(now())
+
+  keywords    Keyword[]
+  articles    Article[]
+  gscData     GscDataPoint[]
+  auditScores AuditScore[]
+}
+
+// ── Keywords with territory ownership ──
+model Keyword {
+  id        String   @id @default(cuid())
+  keyword   String
+  cluster   String
+  volume    Int      @default(0)
+  kd        Int      @default(0)
+  intent    String   // informational, transactional, comparison, local
+  funnel    String   // top, middle, bottom
+  trend     String   @default("stable") // rising, stable, falling, new
+  domainId  String
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  status    String   @default("planned") // planned, priority, live
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gscData GscDataPoint[]
+  article Article?       @relation(fields: [articleId], references: [id])
+  articleId String?
+
+  @@unique([keyword, domainId])
+  @@index([cluster])
+  @@index([domainId])
+}
+
+// ── Articles / Content Plan ──
+model Article {
+  id        String   @id @default(cuid())
+  number    Int
+  title     String
+  slug      String
+  domainId  String
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  status    String   @default("planned") // planned, priority, draft, review, live
+  funnel    String   // ToFu, MoFu, BoFu
+  type      String   // Ratgeber, Landingpage, Vergleich, B2B
+  expertId  String   // which expert "owns" this article's strategy
+  
+  // SEO metadata
+  titleTag       String?
+  metaDescription String?
+  urlSlug        String?
+  wordCount      Int?
+  
+  // Scores (from expert frameworks)
+  skyscraperScore  Int?  // Brian Dean
+  schemaScore      Int?  // Mike King
+  entityScore      Int?  // Jason Barnard
+  eeatScore        Int?  // Lily Ray
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  keywords Keyword[]
+
+  @@index([domainId])
+}
+
+// ── GSC Data (daily snapshots) ──
+model GscDataPoint {
+  id          String   @id @default(cuid())
+  date        DateTime
+  query       String
+  clicks      Int
+  impressions Int
+  ctr         Float
+  position    Float
+  domainId    String
+  domain      Domain   @relation(fields: [domainId], references: [id])
+  keywordId   String?
+  keyword     Keyword? @relation(fields: [keywordId], references: [id])
+  
+  createdAt DateTime @default(now())
+
+  @@unique([date, query, domainId])
+  @@index([domainId, date])
+  @@index([query])
+}
+
+// ── Expert Audit Scores (per domain, per expert framework) ──
+model AuditScore {
+  id        String   @id @default(cuid())
+  domainId  String
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  expertId  String   // dean, king, barnard, ray, fishkin, krum, irwin, dunford
+  framework String
+  score     Int      // 0-100
+  details   String?  // JSON with individual check results
+  createdAt DateTime @default(now())
+
+  @@index([domainId, expertId])
+}
+
+// ── Competitor Tracking ──
+model Competitor {
+  id         String @id @default(cuid())
+  name       String
+  domainUrl  String @unique
+  da         Int    @default(0)
+  keywords   Int    @default(0)
+  traffic    Int    @default(0)
+  threatTo   String // sh, ims, both
+  strength   String
+  weakness   String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ── Cannibalization Risks ──
+model CannibalRisk {
+  id       String @id @default(cuid())
+  keyword  String
+  risk     String // hoch, mittel, niedrig
+  shPage   String
+  imsPage  String
+  solution String
+  expertId String
+  status   String @default("open") // open, resolved, monitoring
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
