@@ -45,6 +45,7 @@ jobs:
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKER_PAT }}
             cd /opt/seo-command-center
             docker compose pull
-            docker compose up -d
+            docker compose down
+            docker compose up -d --force-recreate
             sleep 5
             docker compose ps
