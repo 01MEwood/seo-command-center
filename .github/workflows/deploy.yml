@@ -5,8 +5,8 @@ on:
     branches: [main]
 
 env:
-  FRONTEND_IMAGE: memario/seo-command-center-frontend
-  BACKEND_IMAGE: memario/seo-command-center-backend
+  FRONTEND_IMAGE: marioesch01/seo-command-center-frontend
+  BACKEND_IMAGE: marioesch01/seo-command-center-backend
 
 jobs:
   build-and-push:
