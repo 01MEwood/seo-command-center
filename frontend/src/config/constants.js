@@ -5,7 +5,7 @@
 
 export const APP = {
   name: 'SEO Command Center',
-  version: 'v5.0',
+  version: 'v5.1',
   subtitle: 'Analyse · Content · Tracking',
 };
 
