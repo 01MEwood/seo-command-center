@@ -79,6 +79,59 @@ export default function Diagnose() {
             </div>
           </Card>
 
+          {/* Visibility Scorecard */}
+          {result.visibilityScores && (
+            <Card>
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-gray-400 text-xs uppercase tracking-wider">Gesamt-Sichtbarkeit</span>
+                  <span className={`text-3xl font-bold ${
+                    result.visibilityScores.overall >= 70 ? 'text-emerald-400' :
+                    result.visibilityScores.overall >= 40 ? 'text-yellow-400' : 'text-red-400'
+                  }`}>{result.visibilityScores.overall}<span className="text-gray-600 text-lg">/100</span></span>
+                </div>
+                <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all ${
+                    result.visibilityScores.overall >= 70 ? 'bg-emerald-500' :
+                    result.visibilityScores.overall >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`} style={{ width: `${result.visibilityScores.overall}%` }} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { key: 'seo', label: 'SEO', icon: '🔍', color: 'blue' },
+                  { key: 'aeo', label: 'AEO', icon: '🤖', color: 'purple' },
+                  { key: 'geo', label: 'GEO', icon: '🌐', color: 'cyan' },
+                ].map(({ key, label, icon, color }) => {
+                  const s = result.visibilityScores[key];
+                  if (!s) return null;
+                  const scoreColor = s.score >= 70 ? '#34d399' : s.score >= 40 ? '#fbbf24' : '#f87171';
+                  return (
+                    <div key={key} className="bg-gray-800/40 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-white text-sm font-semibold">{icon} {label}</span>
+                        <span className="text-xl font-bold" style={{ color: scoreColor }}>{s.score}</span>
+                      </div>
+                      {/* Circular-ish progress */}
+                      <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden mb-2">
+                        <div className="h-full rounded-full" style={{ width: `${s.score}%`, backgroundColor: scoreColor }} />
+                      </div>
+                      <p className="text-gray-500 text-xs">{s.label}</p>
+                      {s.factors?.length > 0 && (
+                        <div className="mt-2 space-y-0.5">
+                          {s.factors.slice(0, 3).map((f, i) => (
+                            <div key={i} className="text-gray-600 text-[10px]">• {f}</div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
+
           {/* SERP Results (echte Daten) */}
           {result.rawSerp && (
             <Card title="TOP 10 SERP (Live-Daten)">

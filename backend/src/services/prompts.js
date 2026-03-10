@@ -230,6 +230,24 @@ Erstelle eine strukturierte Diagnose im JSON-Format:
   "region": "${region}",
   "ourPosition": null oder Zahl,
   "summary": "2-3 Sätze Zusammenfassung. Wenn wir in TOP 10 sind, beginne mit: Wir ranken aktuell auf Position X.",
+  "visibilityScores": {
+    "seo": {
+      "score": 0-100,
+      "label": "Kurzbewertung (z.B. 'Position 6, solide Basis')",
+      "factors": ["Positiv/Negativ-Punkte die den Score erklären"]
+    },
+    "aeo": {
+      "score": 0-100,
+      "label": "Kurzbewertung (z.B. 'Kein Featured Snippet, FAQ fehlt')",
+      "factors": ["Positiv/Negativ-Punkte"]
+    },
+    "geo": {
+      "score": 0-100,
+      "label": "Kurzbewertung (z.B. 'Content nicht AI-zitierbar')",
+      "factors": ["Positiv/Negativ-Punkte"]
+    },
+    "overall": 0-100
+  },
   "competitors": [
     {
       "position": 1,
@@ -256,5 +274,31 @@ Erstelle eine strukturierte Diagnose im JSON-Format:
   },
   "estimatedTimeToTop10": "Wenn schon TOP 10: 'Bereits TOP 10 — TOP 3 in ca. X Monaten'. Sonst: 'ca. X Monate'"
 }
+
+SCORING-REGELN für visibilityScores:
+SEO (0-100):
+- Position 1-3: 80-100
+- Position 4-10: 50-79
+- Position 11-20: 20-49
+- Nicht gefunden: 0-19
+- Bonus/Malus für: Backlinks vs Wettbewerber, Domain Authority, Content-Qualität
+
+AEO (0-100):
+- Featured Snippet vorhanden: +30
+- In People Also Ask: +20
+- FAQ-Schema auf der Seite: +20
+- Answer-First Content-Struktur: +15
+- Snippet-optimierte Meta Description: +15
+- Bewerte basierend auf SERP-Daten ob wir AEO-Features haben
+
+GEO (0-100):
+- Entitäts-Klarheit (Name+Ort+Service klar definiert): +25
+- Zitierbare Fakten-Statements im Content: +25
+- Strukturierte Daten (Schema.org): +20
+- Natürliche Frage-Antwort-Paare: +15
+- Konkrete Zahlen/Daten im Content: +15
+- Bewerte basierend auf dem was du über unsere Seite weißt
+
+OVERALL = (SEO × 0.4) + (AEO × 0.3) + (GEO × 0.3), gerundet
 
 Antworte NUR in validem JSON.`;
