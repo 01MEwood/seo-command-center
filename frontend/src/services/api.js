@@ -32,6 +32,21 @@ async function request(path, options = {}) {
 // ── Health ──
 export const health = () => request('/health');
 
+// ── Auth ──
+export const authLogin = (email, password) =>
+  request('/auth/login', { method: 'POST', body: { email, password } });
+
+export const authUsers = () => request('/auth/users');
+
+export const authCreateUser = (email, name, password, role) =>
+  request('/auth/users', { method: 'POST', body: { email, name, password, role } });
+
+export const authUpdateUser = (id, data) =>
+  request(`/auth/users/${id}`, { method: 'PATCH', body: data });
+
+export const authDeleteUser = (id) =>
+  request(`/auth/users/${id}`, { method: 'DELETE' });
+
 // ── SERP Analysis (DataForSEO) ──
 export const serpAnalyze = (keyword, location = 2276) =>
   request('/serp/analyze', { method: 'POST', body: { keyword, location } });

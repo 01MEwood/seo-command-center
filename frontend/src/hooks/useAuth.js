@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { USERS } from '../config/constants';
+import * as api from '../services/api';
 
-const STORAGE_KEY = 'scc_user';
+const STORAGE_KEY = 'meos_seo_user';
 
 export function useAuth() {
   const [user, setUser] = useState(() => {
@@ -20,13 +20,17 @@ export function useAuth() {
     } catch {}
   }, [user]);
 
-  const login = useCallback((username, password) => {
-    const found = USERS.find(u => u.username === username && u.password === password);
-    if (found) {
-      setUser(found);
-      return { ok: true };
+  const login = useCallback(async (email, password) => {
+    try {
+      const result = await api.authLogin(email, password);
+      if (result.user) {
+        setUser(result.user);
+        return { ok: true };
+      }
+      return { ok: false, error: 'Login fehlgeschlagen' };
+    } catch (e) {
+      return { ok: false, error: e.message || 'Falscher Benutzername oder Passwort' };
     }
-    return { ok: false, error: 'Falscher Benutzername oder Passwort' };
   }, []);
 
   const logout = useCallback(() => {

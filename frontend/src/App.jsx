@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// SEO Command Center v5.0
+// MEOS:SEO v5.3
 // Schreinerhelden GmbH & Co. KG — seo.meosapp.de
 // ═══════════════════════════════════════════════════════════════════
 import { useState } from 'react';
@@ -34,7 +34,7 @@ export default function App() {
 
   return (
     <Layout activeTab={activeTab} onNav={setActiveTab} user={user} onLogout={logout}>
-      <Module onNavigate={setActiveTab} />
+      <Module onNavigate={setActiveTab} user={user} />
     </Layout>
   );
 }

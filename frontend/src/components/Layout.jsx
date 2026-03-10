@@ -9,7 +9,7 @@ export default function Layout({ activeTab, onNav, user, onLogout, children }) {
         <div className="p-4 border-b border-gray-800/50">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 bg-blue-600/10 border border-blue-500/20 rounded-lg flex items-center justify-center">
-              <span className="text-blue-400 text-xs font-bold">S</span>
+              <span className="text-blue-400 text-xs font-bold">M</span>
             </div>
             <div>
               <h1 className="text-white font-semibold text-xs tracking-tight">{APP.name}</h1>

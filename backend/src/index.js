@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { mkdirSync } from 'fs';
 
 import healthRoutes from './routes/health.js';
+import authRoutes from './routes/auth.js';
 import gscRoutes from './routes/gsc.js';
 import serpRoutes from './routes/serp.js';
 import keywordRoutes from './routes/keywords.js';
@@ -37,6 +38,7 @@ app.use((req, res, next) => { log.info(`${req.method} ${req.path}`); next(); });
 
 // Routes
 app.use('/api', healthRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/gsc', gscRoutes);
 app.use('/api/serp', serpRoutes);
 app.use('/api/keywords', keywordRoutes);
@@ -73,4 +75,4 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 
 // Start
 startCronJobs(prisma);
-app.listen(PORT, '0.0.0.0', () => log.info(`SEO Command Center v5.0 running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => log.info(`MEOS:SEO v5.3 running on port ${PORT}`));

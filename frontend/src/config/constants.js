@@ -1,19 +1,13 @@
 // ═══════════════════════════════════════════════════════════════════
-// SEO Command Center v5.0 — Constants
+// MEOS:SEO v5.3 — Constants
 // Schreinerhelden GmbH & Co. KG
 // ═══════════════════════════════════════════════════════════════════
 
 export const APP = {
-  name: 'SEO Command Center',
-  version: 'v5.2',
+  name: 'MEOS:SEO',
+  version: 'v5.3',
   subtitle: 'Analyse · Content · Tracking',
 };
-
-export const USERS = [
-  { username: 'admin', password: 'schreinerhelden2026', role: 'Admin' },
-  { username: 'mario', password: 'meos2026!', role: 'Owner' },
-  { username: 'team', password: 'seoTeam2026', role: 'Team' },
-];
 
 // ── 18 Regions with scoring data ──
 export const REGIONS = [
