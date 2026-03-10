@@ -33,8 +33,6 @@ async function getPrompt(key) {
   return overrides[key] || P[key];
 }
 
-let openaiInstance = null;
-
 async function getOpenAI() {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key not configured. Set OPENAI_API_KEY in .env');

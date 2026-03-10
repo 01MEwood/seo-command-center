@@ -35,6 +35,18 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          source: "docker-compose.yml"
+          target: "/opt/seo-command-center/"
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         with:
@@ -46,6 +58,6 @@ jobs:
             cd /opt/seo-command-center
             docker compose pull
             docker compose down
-            docker compose up -d --force-recreate
+            docker compose up -d
             sleep 5
             docker compose ps
