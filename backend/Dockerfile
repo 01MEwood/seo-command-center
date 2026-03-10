@@ -6,4 +6,4 @@ RUN npm install
 COPY . .
 RUN npx prisma generate
 EXPOSE 4000
-CMD ["sh", "-c", "npx prisma migrate deploy 2>/dev/null || npx prisma db push --accept-data-loss=false --skip-generate; node src/index.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node src/index.js"]
