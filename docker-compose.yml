@@ -1,6 +1,7 @@
 # ═══════════════════════════════════════════════════════
 # MEOS:SEO v5.5.4 — docker-compose.yml
-# Auf dem VPS: git pull && docker-compose up -d --build
+# Auf dem VPS: docker-compose pull && docker-compose up -d
+# Images werden von GitHub Actions auf Docker Hub gepusht
 # ═══════════════════════════════════════════════════════
 
 services:
@@ -22,7 +23,6 @@ services:
       - seo_net
 
   backend:
-    build: ./backend
     image: memario/seo-command-center-backend:latest
     restart: always
     depends_on:
@@ -43,7 +43,6 @@ services:
       - seo_net
 
   frontend:
-    build: ./frontend
     image: memario/seo-command-center-frontend:latest
     restart: always
     depends_on:
