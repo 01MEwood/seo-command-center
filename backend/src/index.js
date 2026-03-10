@@ -14,6 +14,7 @@ import competitorRoutes from './routes/competitors.js';
 import pipelineRoutes from './routes/pipeline.js';
 import aiRoutes from './routes/ai.js';
 import trackingRoutes from './routes/tracking.js';
+import citationRoutes from './routes/citations.js';
 import pagespeedRoutes from './routes/pagespeed.js';
 import domainRoutes from './routes/domains.js';
 
@@ -46,6 +47,7 @@ app.use('/api/competitors', competitorRoutes);
 app.use('/api/pipeline', pipelineRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/tracking', trackingRoutes);
+app.use('/api/citations', citationRoutes);
 app.use('/api/pagespeed', pagespeedRoutes);
 app.use('/api/domains', domainRoutes);
 
@@ -75,4 +77,4 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 
 // Start
 startCronJobs(prisma);
-app.listen(PORT, '0.0.0.0', () => log.info(`MEOS:SEO v5.3 running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => log.info(`MEOS:SEO v5.4 running on port ${PORT}`));

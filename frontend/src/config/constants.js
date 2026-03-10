@@ -5,7 +5,7 @@
 
 export const APP = {
   name: 'MEOS:SEO',
-  version: 'v5.3',
+  version: 'v5.4',
   subtitle: 'Analyse · Content · Tracking',
 };
 
@@ -65,6 +65,7 @@ export const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'analyse', label: 'Analyse', icon: '🔍' },
   { id: 'diagnose', label: 'Diagnose', icon: '⚔️' },
+  { id: 'citations', label: 'AI Voice', icon: '🔮' },
   { id: 'keywords', label: 'Keywords', icon: '🎯' },
   { id: 'content', label: 'Content', icon: '✍️' },
   { id: 'tracking', label: 'Tracking', icon: '📈' },

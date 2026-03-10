@@ -9,6 +9,7 @@ import Layout from './components/Layout';
 import Dashboard from './modules/Dashboard';
 import Analyse from './modules/Analyse';
 import Diagnose from './modules/Diagnose';
+import Citations from './modules/Citations';
 import Keywords from './modules/Keywords';
 import Content from './modules/Content';
 import Tracking from './modules/Tracking';
@@ -24,6 +25,7 @@ export default function App() {
     dashboard: Dashboard,
     analyse: Analyse,
     diagnose: Diagnose,
+    citations: Citations,
     keywords: Keywords,
     content: Content,
     tracking: Tracking,

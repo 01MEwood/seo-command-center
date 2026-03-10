@@ -126,3 +126,16 @@ export const trackingHistory = (id) =>
 
 export const trackingRefresh = () =>
   request('/tracking/refresh', { method: 'POST', timeout: 120000 });
+
+// ── AI Citation Monitor ──
+export const citationCheck = (query, keyword, region) =>
+  request('/citations/check', { method: 'POST', body: { query, keyword, region }, timeout: 120000 });
+
+export const citationQueries = () =>
+  request('/citations/queries');
+
+export const citationDashboard = () =>
+  request('/citations/dashboard');
+
+export const citationBulk = (queries) =>
+  request('/citations/bulk', { method: 'POST', body: { queries }, timeout: 300000 });

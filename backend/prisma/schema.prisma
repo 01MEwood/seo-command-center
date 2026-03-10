@@ -188,3 +188,38 @@ model PositionSnapshot {
 
   @@index([trackedKeywordId, date])
 }
+
+// ═══════════════════════════════════════════════════
+// NEW v5.4: AI Citation Monitor
+// ═══════════════════════════════════════════════════
+
+// A query we monitor across AI engines
+model CitationQuery {
+  id        String   @id @default(cuid())
+  query     String   // "Welche Schreinerei in Stuttgart baut Einbauschränke?"
+  keyword   String   // base keyword
+  region    String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  checks CitationCheck[]
+
+  @@unique([query])
+}
+
+// Individual check result per AI engine
+model CitationCheck {
+  id              String   @id @default(cuid())
+  citationQueryId String
+  citationQuery   CitationQuery @relation(fields: [citationQueryId], references: [id], onDelete: Cascade)
+
+  engine          String   // chatgpt, perplexity, gemini
+  mentioned       Boolean  // was "Schreinerhelden" mentioned?
+  mentionType     String?  // direct_citation, recommendation, passing_mention, not_found
+  snippet         String?  // the relevant text snippet
+  competitorsMentioned String? // JSON array of competitor names mentioned
+  fullResponse    String?  // full AI response (for analysis)
+  date            DateTime @default(now())
+
+  @@index([citationQueryId, engine, date])
+}
