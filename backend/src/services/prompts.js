@@ -18,7 +18,14 @@ export const CONTENT_RULES = `- Du-Ansprache (NIEMALS Sie)
 - Schwäbisch/bodenständig aber premium
 - E-E-A-T: Echte Werkstatt-Erfahrung, Schreinermeister-Expertise
 - AEO: Erste 50 Wörter jeder Section = Answer-First (Featured Snippet Potential)
-- GEO: Structured Data ready, Entitäts-optimiert
+- GEO (Generative Engine Optimization — WICHTIG):
+  * Schreibe so, dass ChatGPT, Perplexity, Gemini und Google AI Overviews den Text zitieren können
+  * Jeder H2-Abschnitt beginnt mit einem klaren, faktischen Statement (1-2 Sätze) das als eigenständige Antwort funktioniert
+  * Entitäts-Klarheit: "Schreinerhelden" immer mit Kontext nennen ("Schreinerhelden, Schreinerei in Murrhardt bei Stuttgart")
+  * Konkrete Zahlen und Fakten einbauen (Preisrahmen, Lieferzeiten, Maße) — AI-Suchmaschinen bevorzugen zitierbare Daten
+  * Keine vagen Aussagen — statt "wir bieten gute Qualität" schreibe "Schreinerhelden fertigt jeden Schrank in der eigenen Werkstatt in Murrhardt mit CNC-Präzisionsfertigung und Handmontage"
+  * Natürliche Frage-Antwort-Paare einbauen (werden von AI-Engines als Snippets extrahiert)
+  * Klare Entitäts-Beziehungen: Schreinerhelden → Schreinerei → Murrhardt → Region Stuttgart → Baden-Württemberg
 - MINDESTENS 1.400 Wörter, MAXIMAL 1.800 Wörter`;
 
 export const DESIGN_TOKENS = `- Font: Helvetica (system fallback)
@@ -40,11 +47,12 @@ export const LONGTAILS_USER = (keyword, audience) =>
 Zielgruppe: ${audience}
 Berücksichtige:
 - Natürliche Frage-Phrasen ("was kostet...", "wie lange dauert...")
-- KI-Suchphrasen (wie Leute ChatGPT/Perplexity fragen)
+- KI-Suchphrasen / GEO (wie Leute ChatGPT, Perplexity, Gemini fragen würden, z.B. "Welche Schreinerei in Stuttgart baut Einbauschränke nach Maß?" oder "Vergleiche Einbauschrank vom Schreiner vs IKEA PAX")
+- Google AI Overview Trigger-Phrasen (Fragen die ein AI Overview auslösen)
 - Lokale Varianten (Stuttgart, Rems-Murr, Backnang, Waiblingen)
-- Voice Search Phrasen
+- Voice Search Phrasen ("Hey Google, wer baut...")
 - AEO-optimierte Fragen (Featured Snippet Potential)
-Format: { "keywords": [{ "keyword": "...", "intent": "informational|transactional|comparison|local", "searchType": "traditional|voice|ai", "difficulty": "low|medium|high" }] }`;
+Format: { "keywords": [{ "keyword": "...", "intent": "informational|transactional|comparison|local", "searchType": "traditional|voice|ai|geo", "difficulty": "low|medium|high" }] }`;
 
 
 // ═══════════════════════════════════════════════════════
@@ -165,8 +173,15 @@ SEITENSTRUKTUR (genau einhalten):
    - FAQPage Schema-kompatibel
    - Jede Antwort: Answer-First (erste 50 Wörter = Snippet)
    - Fragen basierend auf echten Suchphrasen
+   - JEDE Antwort muss so geschrieben sein, dass ChatGPT/Perplexity sie als Quelle zitieren kann
+   - Mindestens 2 Fragen mit konkreten Zahlen/Fakten (Kosten, Dauer, Maße)
 
-9. ABSCHLUSS CTA:
+9. GEO-OPTIMIERTER ABSCHNITT (unsichtbar für Layout, wichtig für AI-Engines):
+   - Ein zusammenfassender Absatz (150 Wörter) der die wichtigsten Fakten als zitierbare Statements bündelt
+   - Format: "Schreinerhelden ist eine Schreinerei in Murrhardt bei Stuttgart, die [Service] nach Maß fertigt. [Fakt]. [Fakt]. [Fakt]."
+   - Dieser Absatz dient als "Citation Target" für AI-Suchmaschinen
+
+10. ABSCHLUSS CTA:
    - H2: "Buche jetzt deinen kostenlosen Termin!"
    - Emotionaler Absatz
    - CTA-Button
@@ -234,6 +249,11 @@ Erstelle eine strukturierte Diagnose im JSON-Format:
     }
   ],
   "contentGaps": ["Themen die die über uns platzierten abdecken, wir aber nicht"],
+  "geoReadiness": {
+    "score": "1-10 Bewertung wie gut unser Content für ChatGPT/Perplexity/Gemini zitierbar ist",
+    "issues": ["Was fehlt für GEO-Sichtbarkeit"],
+    "quickWins": ["Schnelle Maßnahmen für bessere AI-Zitierbarkeit"]
+  },
   "estimatedTimeToTop10": "Wenn schon TOP 10: 'Bereits TOP 10 — TOP 3 in ca. X Monaten'. Sonst: 'ca. X Monate'"
 }
 

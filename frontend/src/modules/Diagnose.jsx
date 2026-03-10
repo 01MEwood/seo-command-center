@@ -140,6 +140,40 @@ export default function Diagnose() {
             </Card>
           )}
 
+          {/* GEO Readiness */}
+          {result.geoReadiness && (
+            <Card title="🌐 GEO-Readiness (AI-Suchmaschinen Sichtbarkeit)">
+              <div className="flex items-center gap-4 mb-4">
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
+                  result.geoReadiness.score >= 7 ? 'bg-emerald-900/30 text-emerald-400' :
+                  result.geoReadiness.score >= 4 ? 'bg-yellow-900/30 text-yellow-400' :
+                  'bg-red-900/30 text-red-400'
+                }`}>{result.geoReadiness.score}/10</div>
+                <p className="text-gray-400 text-sm">Wie gut ist unser Content für ChatGPT, Perplexity, Gemini und Google AI Overviews zitierbar?</p>
+              </div>
+              {result.geoReadiness.issues?.length > 0 && (
+                <div className="mb-3">
+                  <span className="text-red-400/70 text-xs block mb-2">Probleme:</span>
+                  {result.geoReadiness.issues.map((issue, i) => (
+                    <div key={i} className="flex items-start gap-2 py-1 text-sm text-gray-400">
+                      <span className="text-red-400">✗</span> {issue}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {result.geoReadiness.quickWins?.length > 0 && (
+                <div>
+                  <span className="text-emerald-400/70 text-xs block mb-2">Quick Wins:</span>
+                  {result.geoReadiness.quickWins.map((win, i) => (
+                    <div key={i} className="flex items-start gap-2 py-1 text-sm text-gray-400">
+                      <span className="text-emerald-400">→</span> {win}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
+
           {/* Action Plan */}
           {result.actionPlan?.length > 0 && (
             <Card title="🎯 Maßnahmenplan">
