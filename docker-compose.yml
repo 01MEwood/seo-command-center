@@ -23,7 +23,7 @@ services:
       - seo_net
 
   backend:
-    image: marioesch01/seo-command-center-backend:latest
+    image: memario/seo-command-center-backend:latest
     restart: always
     depends_on:
       db:
@@ -43,7 +43,7 @@ services:
       - seo_net
 
   frontend:
-    image: marioesch01/seo-command-center-frontend:latest
+    image: memario/seo-command-center-frontend:latest
     restart: always
     depends_on:
       - backend
