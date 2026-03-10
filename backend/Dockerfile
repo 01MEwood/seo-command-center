@@ -7,7 +7,7 @@ RUN apk add --no-cache curl openssl openssl-dev
 # Dependencies first (cache layer)
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 RUN npx prisma generate
 
 # Copy source
