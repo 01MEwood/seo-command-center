@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, Btn, Input, Select, Spinner, EmptyState, ErrorBox, TabBar, Badge } from '../components/ui';
 import * as api from '../services/api';
 import { REGIONS, SH_SERVICES } from '../config/constants';
@@ -16,6 +16,7 @@ export default function Content() {
     { id: 'landingpage', label: 'Landing Page' },
     { id: 'social', label: 'Social Multiplier' },
     { id: 'article', label: 'Artikel' },
+    { id: 'prompts', label: '⚙️ Prompt Editor' },
   ];
 
   return (
@@ -28,6 +29,7 @@ export default function Content() {
       {tab === 'landingpage' && <LandingPageGenerator />}
       {tab === 'social' && <SocialMultiplier />}
       {tab === 'article' && <ArticleGenerator />}
+      {tab === 'prompts' && <PromptEditor />}
     </div>
   );
 }
@@ -385,6 +387,208 @@ function ArticleGenerator() {
           <pre className="text-gray-300 text-sm whitespace-pre-wrap font-sans leading-relaxed bg-gray-800/30 rounded-lg p-5 max-h-[700px] overflow-y-auto">{content}</pre>
         </Card>
       )}
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 4: PROMPT EDITOR
+// ═══════════════════════════════════════════════════════
+
+const CATEGORY_LABELS = {
+  basis: '📋 Basis-Kontext',
+  keywords: '🔑 Keywords / AEO',
+  content: '📝 Content-Generierung',
+  analyse: '🔍 Analyse / Diagnose',
+  social: '📱 Social Media',
+};
+
+function PromptEditor() {
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editingKey, setEditingKey] = useState(null);
+  const [editValue, setEditValue] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [successKey, setSuccessKey] = useState(null);
+  const [filter, setFilter] = useState('all');
+
+  const load = useCallback(async () => {
+    try {
+      const data = await api.promptsList();
+      setTemplates(data);
+    } catch (e) { setError(e.message); }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const startEdit = (t) => {
+    setEditingKey(t.key);
+    setEditValue(t.currentValue || t.defaultValue);
+    setError(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingKey(null);
+    setEditValue('');
+  };
+
+  const save = async () => {
+    if (!editValue.trim()) return;
+    setSaving(true); setError(null);
+    try {
+      await api.promptSave(editingKey, editValue);
+      setSuccessKey(editingKey);
+      setTimeout(() => setSuccessKey(null), 3000);
+      setEditingKey(null);
+      setEditValue('');
+      await load();
+    } catch (e) { setError(e.message); }
+    setSaving(false);
+  };
+
+  const resetToDefault = async (key) => {
+    if (!confirm('Wirklich auf Standard zurücksetzen? Deine Änderungen gehen verloren.')) return;
+    try {
+      await api.promptReset(key);
+      setSuccessKey(key);
+      setTimeout(() => setSuccessKey(null), 3000);
+      if (editingKey === key) cancelEdit();
+      await load();
+    } catch (e) { setError(e.message); }
+  };
+
+  if (loading) return <div className="flex items-center justify-center h-64"><Spinner size="lg" /></div>;
+
+  const categories = [...new Set(templates.map(t => t.category))];
+  const filtered = filter === 'all' ? templates : templates.filter(t => t.category === filter);
+
+  // Group by category
+  const grouped = {};
+  for (const t of filtered) {
+    if (!grouped[t.category]) grouped[t.category] = [];
+    grouped[t.category].push(t);
+  }
+
+  return (
+    <>
+      <Card title="Prompt Editor" actions={
+        <div className="flex items-center gap-2">
+          <Badge color="blue">{templates.filter(t => t.isOverridden).length} angepasst</Badge>
+          <Badge color="gray">{templates.filter(t => !t.isOverridden).length} Standard</Badge>
+        </div>
+      }>
+        <p className="text-gray-500 text-xs mb-4">
+          Hier kannst du die System-Prompts für alle AI-Features anpassen.
+          Änderungen werden in der Datenbank gespeichert und überschreiben die Defaults.
+          Du kannst jederzeit auf den Standard zurücksetzen.
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          <Btn size="xs" variant={filter === 'all' ? 'primary' : 'ghost'} onClick={() => setFilter('all')}>
+            Alle ({templates.length})
+          </Btn>
+          {categories.map(cat => (
+            <Btn key={cat} size="xs" variant={filter === cat ? 'primary' : 'ghost'} onClick={() => setFilter(cat)}>
+              {CATEGORY_LABELS[cat] || cat} ({templates.filter(t => t.category === cat).length})
+            </Btn>
+          ))}
+        </div>
+      </Card>
+
+      <ErrorBox message={error} onDismiss={() => setError(null)} />
+
+      {Object.entries(grouped).map(([cat, items]) => (
+        <div key={cat} className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-400 mt-4">
+            {CATEGORY_LABELS[cat] || cat}
+          </h3>
+          {items.map(t => {
+            const isEditing = editingKey === t.key;
+            const isSuccess = successKey === t.key;
+
+            return (
+              <Card key={t.key}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-white text-sm font-medium">{t.label}</span>
+                      {t.isOverridden ? (
+                        <Badge color="yellow">angepasst</Badge>
+                      ) : (
+                        <Badge color="gray">Standard</Badge>
+                      )}
+                      {isSuccess && <Badge color="green">gespeichert</Badge>}
+                    </div>
+                    <p className="text-gray-600 text-xs">{t.description}</p>
+                    <p className="text-gray-700 text-[10px] mt-0.5 font-mono">{t.key}</p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    {!isEditing && (
+                      <>
+                        <Btn size="xs" variant="secondary" onClick={() => startEdit(t)}>
+                          ✏️ Bearbeiten
+                        </Btn>
+                        {t.isOverridden && (
+                          <Btn size="xs" variant="ghost" onClick={() => resetToDefault(t.key)}>
+                            ↩️ Reset
+                          </Btn>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Preview (collapsed) */}
+                {!isEditing && (
+                  <pre className="text-gray-500 text-xs bg-gray-800/30 rounded-lg p-3 mt-3 max-h-[120px] overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed">
+                    {(t.currentValue || t.defaultValue).slice(0, 500)}
+                    {(t.currentValue || t.defaultValue).length > 500 ? '\n\n[...]' : ''}
+                  </pre>
+                )}
+
+                {/* Editor */}
+                {isEditing && (
+                  <div className="mt-3 space-y-3">
+                    <textarea
+                      value={editValue}
+                      onChange={e => setEditValue(e.target.value)}
+                      className="w-full bg-gray-900/80 border border-blue-500/40 rounded-lg px-4 py-3 text-gray-300 text-xs font-mono placeholder-gray-600 focus:outline-none focus:border-blue-500/80 transition-colors resize-y leading-relaxed"
+                      style={{ minHeight: '200px', maxHeight: '500px' }}
+                      spellCheck={false}
+                    />
+                    <div className="flex items-center justify-between">
+                      <div className="text-gray-600 text-[10px]">
+                        {editValue.length} Zeichen · {editValue.split('\n').length} Zeilen
+                      </div>
+                      <div className="flex gap-2">
+                        <Btn size="xs" variant="ghost" onClick={() => {
+                          setEditValue(t.defaultValue);
+                        }}>
+                          Standard laden
+                        </Btn>
+                        <Btn size="xs" variant="ghost" onClick={cancelEdit}>Abbrechen</Btn>
+                        <Btn size="xs" onClick={save} disabled={saving}>
+                          {saving ? <><Spinner /> Speichern...</> : '💾 Speichern'}
+                        </Btn>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Override timestamp */}
+                {t.isOverridden && t.updatedAt && !isEditing && (
+                  <p className="text-gray-700 text-[10px] mt-2">
+                    Zuletzt geändert: {new Date(t.updatedAt).toLocaleDateString('de', {
+                      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                    })}
+                  </p>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      ))}
     </>
   );
 }

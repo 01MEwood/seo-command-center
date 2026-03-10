@@ -190,6 +190,87 @@ export default function Analyse() {
             </Card>
           </div>
 
+          {/* ═══ HANDLUNGSANWEISUNG: Nicht gefunden ═══ */}
+          {display && !display.ourPosition && (
+            <Card>
+              <div className="bg-amber-900/10 border border-amber-800/30 rounded-lg p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <p className="text-amber-400 font-medium text-sm">
+                      Nicht in den TOP 10 für "{display.keyword}"
+                    </p>
+                    <p className="text-gray-500 text-xs mt-0.5">
+                      Weder schreinerhelden.de noch ihr-moebel-schreiner.de rankt aktuell in den TOP 10. Hier ist dein Fahrplan:
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mt-3">
+                  <div className="flex gap-3 items-start">
+                    <span className="text-emerald-400 font-bold text-sm shrink-0 w-6">1.</span>
+                    <div>
+                      <p className="text-white text-sm font-medium">Landing Page erstellen</p>
+                      <p className="text-gray-400 text-xs">
+                        Geh auf den Tab "Content → Landing Page" und generiere eine LP für genau dieses Keyword.
+                        Ziel: 1.400+ Wörter mit Schema.org, FAQ, GEO-Absatz. Dann in Elementor einbauen.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <span className="text-emerald-400 font-bold text-sm shrink-0 w-6">2.</span>
+                    <div>
+                      <p className="text-white text-sm font-medium">Social Multiplier nutzen</p>
+                      <p className="text-gray-400 text-xs">
+                        LP-Content in alle Kanäle verteilen (GBP, Instagram, Pinterest, Blog).
+                        Das erzeugt initiale Signale und Backlinks.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <span className="text-emerald-400 font-bold text-sm shrink-0 w-6">3.</span>
+                    <div>
+                      <p className="text-white text-sm font-medium">Wettbewerber-Diagnose starten</p>
+                      <p className="text-gray-400 text-xs">
+                        Geh auf "Diagnose" und analysiere, wer stattdessen rankt. Du erfährst was die besser machen und wo deine Chancen liegen.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <span className="text-emerald-400 font-bold text-sm shrink-0 w-6">4.</span>
+                    <div>
+                      <p className="text-white text-sm font-medium">Indexierung beantragen</p>
+                      <p className="text-gray-400 text-xs">
+                        Neue LP in der Google Search Console einreichen → "URL-Prüfung" → "Indexierung beantragen".
+                        Alternativ: Indexing API über die Settings.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <span className="text-emerald-400 font-bold text-sm shrink-0 w-6">5.</span>
+                    <div>
+                      <p className="text-white text-sm font-medium">Tracking aktivieren + Geduld</p>
+                      <p className="text-gray-400 text-xs">
+                        Unten "Tracking starten" klicken. Erste Rankings nach 2-4 Wochen, TOP 10 realistisch in 2-4 Monaten (abhängig vom Wettbewerb).
+                        Wöchentlich hier prüfen.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {display.serpResults?.length > 0 && (
+                  <div className="border-t border-amber-800/20 pt-3 mt-3">
+                    <p className="text-gray-500 text-xs">
+                      Aktuell rankt <strong className="text-gray-400">{display.serpResults[0]?.domain}</strong> auf Platz 1.
+                      {display.searchVolume ? ` Suchvolumen: ${display.searchVolume.toLocaleString('de')}/Monat.` : ''}
+                      {display.competition ? ` Wettbewerb: ${display.competition}.` : ''}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
           {/* TOP 10 SERP Results */}
           <Card title="TOP 10 Wettbewerber">
             <div className="space-y-1">

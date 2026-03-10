@@ -139,3 +139,13 @@ export const citationDashboard = () =>
 
 export const citationBulk = (queries) =>
   request('/citations/bulk', { method: 'POST', body: { queries }, timeout: 300000 });
+
+// ── Prompt Editor ──
+export const promptsList = () =>
+  request('/prompts');
+
+export const promptSave = (key, value) =>
+  request(`/prompts/${key}`, { method: 'PUT', body: { value } });
+
+export const promptReset = (key) =>
+  request(`/prompts/${key}`, { method: 'DELETE' });

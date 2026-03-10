@@ -193,6 +193,15 @@ model PositionSnapshot {
 // NEW v5.4: AI Citation Monitor
 // ═══════════════════════════════════════════════════
 
+// Prompt overrides (for Prompt Editor)
+model PromptOverride {
+  id        String   @id @default(cuid())
+  key       String   @unique  // matches export name in prompts.js
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // A query we monitor across AI engines
 model CitationQuery {
   id        String   @id @default(cuid())

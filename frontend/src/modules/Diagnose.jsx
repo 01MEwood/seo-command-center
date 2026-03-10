@@ -55,6 +55,36 @@ export default function Diagnose() {
 
       {result && (
         <>
+          {/* ═══ HANDLUNGSANWEISUNG wenn nicht gefunden ═══ */}
+          {!result.ourPosition && (
+            <Card>
+              <div className="bg-amber-900/10 border border-amber-800/30 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">⚠️</span>
+                  <p className="text-amber-400 font-medium text-sm">Nicht in den TOP 10 — So gehst du vor:</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="flex gap-2">
+                    <span className="text-emerald-400 font-bold shrink-0">1.</span>
+                    <p className="text-gray-400"><strong className="text-gray-300">Diagnose lesen</strong> — Scrolle runter und schau dir den Action Plan an. Was machen die Wettbewerber besser?</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-emerald-400 font-bold shrink-0">2.</span>
+                    <p className="text-gray-400"><strong className="text-gray-300">Landing Page bauen</strong> — Content → LP Generator mit exakt diesem Keyword. 1.400+ Wörter, Schema.org, GEO-optimiert.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-emerald-400 font-bold shrink-0">3.</span>
+                    <p className="text-gray-400"><strong className="text-gray-300">Content verteilen</strong> — Social Multiplier nutzen. GBP-Post, Instagram, Pinterest, Blog-Artikel.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-emerald-400 font-bold shrink-0">4.</span>
+                    <p className="text-gray-400"><strong className="text-gray-300">In 4 Wochen erneut prüfen</strong> — Tracking aktivieren und wöchentlich Position beobachten.</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Summary */}
           <Card>
             <div className="flex items-start gap-4">

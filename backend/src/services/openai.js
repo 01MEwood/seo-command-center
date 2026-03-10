@@ -4,6 +4,34 @@
 
 import { log } from './logger.js';
 import * as P from './prompts.js';
+import { PrismaClient } from '@prisma/client';
+
+let openaiInstance = null;
+let promptOverrides = {};
+let overridesLoadedAt = 0;
+
+// Load prompt overrides from DB (cache for 60s)
+async function loadOverrides() {
+  const now = Date.now();
+  if (now - overridesLoadedAt < 60000) return promptOverrides;
+  try {
+    const prisma = new PrismaClient();
+    const rows = await prisma.promptOverride.findMany();
+    await prisma.$disconnect();
+    promptOverrides = {};
+    for (const r of rows) promptOverrides[r.key] = r.value;
+    overridesLoadedAt = now;
+  } catch (e) {
+    log.warn('Failed to load prompt overrides:', e.message);
+  }
+  return promptOverrides;
+}
+
+// Get prompt value: override if exists, else default
+async function getPrompt(key) {
+  const overrides = await loadOverrides();
+  return overrides[key] || P[key];
+}
 
 let openaiInstance = null;
 
@@ -44,37 +72,43 @@ export async function generateLongtails(keyword, domain = 'sh') {
     ? 'Privatkunden, Eigenheimbesitzer, Region Stuttgart'
     : 'Architekten, Bauträger, Gewerbetreibende';
 
-  const result = await chat(P.LONGTAILS_SYSTEM, P.LONGTAILS_USER(keyword, audience), { json: true, temperature: 0.8 });
+  const sys = await getPrompt('LONGTAILS_SYSTEM');
+  const result = await chat(sys, P.LONGTAILS_USER(keyword, audience), { json: true, temperature: 0.8 });
   return JSON.parse(result);
 }
 
 // ── AEO/People Also Ask Questions ──
 export async function generateAeoQuestions(keyword, serpData = '') {
-  const result = await chat(P.AEO_SYSTEM, P.AEO_USER(keyword, serpData), { json: true, temperature: 0.7 });
+  const sys = await getPrompt('AEO_SYSTEM');
+  const result = await chat(sys, P.AEO_USER(keyword, serpData), { json: true, temperature: 0.7 });
   return JSON.parse(result);
 }
 
 // ── Content Draft (Markdown) ──
 export async function generateContentDraft(keyword, region, serpData, longtails) {
-  return await chat(P.CONTENT_DRAFT_SYSTEM, P.CONTENT_DRAFT_USER(keyword, region, serpData, longtails), { temperature: 0.8, maxTokens: 4000 });
+  const sys = await getPrompt('CONTENT_DRAFT_SYSTEM');
+  return await chat(sys, P.CONTENT_DRAFT_USER(keyword, region, serpData, longtails), { temperature: 0.8, maxTokens: 4000 });
 }
 
 // ── HTML Landing Page (Elementor-ready) ──
 export async function generateHtmlLandingPage(keyword, region, service, serpData, longtails) {
-  return await chat(P.LANDING_PAGE_SYSTEM, P.LANDING_PAGE_USER(keyword, region, service, serpData, longtails), { temperature: 0.8, maxTokens: 8000 });
+  const sys = await getPrompt('LANDING_PAGE_SYSTEM');
+  return await chat(sys, P.LANDING_PAGE_USER(keyword, region, service, serpData, longtails), { temperature: 0.8, maxTokens: 8000 });
 }
 
 // ── Wettbewerber-Diagnose ──
 export async function generateCompetitorDiagnosis(keyword, region, serpResults, ourData, competitorData) {
-  const result = await chat(P.DIAGNOSIS_SYSTEM, P.DIAGNOSIS_USER(keyword, region, serpResults, ourData, competitorData), { json: true, temperature: 0.7, maxTokens: 3000 });
+  const sys = await getPrompt('DIAGNOSIS_SYSTEM');
+  const result = await chat(sys, P.DIAGNOSIS_USER(keyword, region, serpResults, ourData, competitorData), { json: true, temperature: 0.7, maxTokens: 3000 });
   return JSON.parse(result);
 }
 
 // ── Social Content Multiplier ──
 export async function generateSocialContent(channel, keyword, region, lpSummary) {
+  const sys = await getPrompt('SOCIAL_SYSTEM');
   const userPrompt = P.SOCIAL_MULTIPLIER_USER(channel, keyword, region, lpSummary);
   const isJson = ['instagram', 'pinterest'].includes(channel);
-  const result = await chat(P.SOCIAL_SYSTEM, userPrompt, {
+  const result = await chat(sys, userPrompt, {
     temperature: 0.8,
     maxTokens: 2000,
     json: isJson,

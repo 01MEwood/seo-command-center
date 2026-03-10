@@ -1,33 +1,24 @@
-# SEO Command Center v5.0
+# SEO Command Center v5.5
 
 **Schreinerhelden GmbH & Co. KG** — seo.meosapp.de
 
-Analyse · Content · Tracking — Ein scharfes SEO-Werkzeug.
+Analyse · Diagnose · Content · Tracking — Ein scharfes SEO-Werkzeug.
 
 ## Was ist das?
 
 Ein Tool zum:
 1. **Analysieren** — Keyword + Region → TOP 10 Wettbewerber, Suchvolumen, Longtails, AEO-Fragen
-2. **Bauen** — GPT-4o generiert SEO-optimierte Artikel für Position 1
-3. **Tracken** — Position-Monitoring über Zeit
+2. **Diagnostizieren** — Wettbewerber-Analyse mit SERP + Backlinks + GPT-4o Diagnose
+3. **Bauen** — HTML Landing Pages, Markdown-Artikel, Social Content (GBP, Instagram, Pinterest, Blog)
+4. **Tracken** — Position-Monitoring über Zeit
+5. **Prompts anpassen** — Alle AI-Prompts live im Browser bearbeiten
 
 ## Stack
 
-- **Frontend:** React + Vite + Tailwind (Outfit Font)
+- **Frontend:** React + Vite + Tailwind
 - **Backend:** Express + Prisma + PostgreSQL
-- **APIs:** DataForSEO, OpenAI GPT-4o, Google Search Console
-- **Deploy:** Docker Hub → Hostinger VPS (GitHub Actions CI/CD)
-
-## Architektur (v5.0 vs v4.1)
-
-| | v4.1 | v5.0 |
-|---|---|---|
-| Frontend | 1.157 Zeilen in einer Datei | 6 Module, 8 Components, Services-Layer |
-| API Keys | Im Browser (localStorage) | Serverseitig (.env) |
-| Backend | 670 Zeilen in einer Datei | 10 Route-Dateien, 4 Services |
-| Wettbewerber | GPT-only (Halluzination) | DataForSEO SERP + Volume + Backlinks |
-| Tracking | Nicht vorhanden | Position-Snapshots über Zeit |
-| Tabs | 11 (davon 5 Placeholder) | 6 (alle funktional) |
+- **APIs:** DataForSEO, OpenAI GPT-4o, Google Search Console, PageSpeed, Indexing API
+- **Deploy:** Docker Hub → Hostinger VPS
 
 ## Module
 
@@ -35,10 +26,38 @@ Ein Tool zum:
 |---|---|
 | **Dashboard** | KPIs, System-Status, letzte Analysen |
 | **Analyse** | Keyword+Region → SERP → Volume → Longtails → AEO → Content |
+| **Diagnose** | Wettbewerber-Diagnose (SEO/AEO/GEO Scores) |
+| **Citations** | AI-Suchmaschinen Monitoring (ChatGPT/Perplexity/Gemini) |
 | **Keywords** | Recherche (DataForSEO), Longtails (GPT-4o), GSC Live |
-| **Content** | SEO-Artikel generieren |
+| **Content** | Landing Pages, Social Multiplier, Artikel, **Prompt Editor** |
 | **Tracking** | Position-Monitoring mit Sparkline-Charts |
-| **Settings** | System-Status, Service-Health |
+| **Settings** | System-Status, Service-Health, User-Verwaltung |
+
+## v5.5 Änderungen
+
+- **Prompt Editor** — Alle System-Prompts direkt im Content-Tab bearbeitbar (DB-gespeichert, mit Reset-Funktion)
+- **Handlungsanweisung** — Wenn ein Keyword nicht in TOP 10 gefunden wird, zeigt die App einen konkreten 5-Schritte-Fahrplan
+- **DB-Migration Fix** — Sichere Migration-Strategie (`prisma migrate deploy` mit Fallback)
+
+## ⚠️ WICHTIG: Tracking-Daten behalten
+
+Tracking-Daten liegen in der PostgreSQL-Datenbank im Docker Volume `seo_pgdata`.
+
+**NIEMALS** `docker-compose down -v` verwenden! Das `-v` Flag löscht ALLE Volumes inkl. Datenbank!
+
+Stattdessen:
+```bash
+# Container stoppen/updaten (Daten bleiben erhalten):
+docker-compose down          # ← OHNE -v !
+docker-compose pull
+docker-compose up -d
+
+# DB-Backup machen (empfohlen vor jedem Update):
+docker-compose exec db pg_dump -U seoadmin seo_command > backup_$(date +%Y%m%d).sql
+
+# DB-Backup wiederherstellen:
+cat backup_20250310.sql | docker-compose exec -T db psql -U seoadmin seo_command
+```
 
 ## Setup (Lokal)
 
@@ -60,14 +79,21 @@ npm run dev
 
 ## Deploy (Produktion)
 
-Push auf `main` → GitHub Actions baut Docker Images → Deploy auf Hostinger VPS.
-
 ```bash
-# Manuell (falls nötig)
+# 1. Build & Push
 docker build -t memario/seo-command-center-backend:latest ./backend
 docker build -t memario/seo-command-center-frontend:latest ./frontend
 docker push memario/seo-command-center-backend:latest
 docker push memario/seo-command-center-frontend:latest
+
+# 2. Auf dem VPS
+ssh root@31.97.122.6
+cd /opt/seo-command-center   # oder wo docker-compose.yml liegt
+docker-compose exec db pg_dump -U seoadmin seo_command > backup_pre_update.sql  # BACKUP!
+docker-compose down           # OHNE -v !!
+docker-compose pull
+docker-compose up -d
+docker-compose logs -f
 ```
 
 ## Datenbank-Modelle
@@ -77,3 +103,5 @@ docker push memario/seo-command-center-frontend:latest
 - **TrackedKeyword** — Keyword im Position-Monitoring
 - **PositionSnapshot** — Täglicher Positions-Check
 - **GscDataPoint** — GSC-Daten (automatisch via Cron)
+- **PromptOverride** — Angepasste AI-Prompts (Prompt Editor)
+- **CitationQuery / CitationCheck** — AI-Suchmaschinen Monitoring
