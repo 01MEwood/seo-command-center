@@ -224,12 +224,19 @@ ${serpResults || 'Keine Daten'}
 BACKLINK-/DOMAIN-DATEN DER WETTBEWERBER:
 ${competitorData || 'Keine Daten'}
 
+WICHTIGE REGEL für die Einschätzung:
+- Wenn wir BEREITS in den TOP 10 sind: "estimatedTimeToTop3" statt "estimatedTimeToTop10" angeben!
+- Wenn wir auf Position 1-3 sind: "Bereits TOP 3 — Verteidigung und Ausbau"
+- Wenn wir auf Position 4-10 sind: "Bereits TOP 10 — geschätzte Zeit bis TOP 3: X Monate"
+- Wenn wir NICHT in TOP 10 sind: "Geschätzte Zeit bis TOP 10: X Monate"
+- Sei realistisch und berücksichtige die Backlink-Daten der Wettbewerber über uns
+
 Erstelle eine strukturierte Diagnose im JSON-Format:
 {
   "keyword": "${keyword}",
   "region": "${region}",
   "ourPosition": null oder Zahl,
-  "summary": "2-3 Sätze Zusammenfassung",
+  "summary": "2-3 Sätze Zusammenfassung. Wenn wir in TOP 10 sind, beginne mit: Wir ranken aktuell auf Position X.",
   "competitors": [
     {
       "position": 1,
@@ -238,18 +245,18 @@ Erstelle eine strukturierte Diagnose im JSON-Format:
       "weaknesses": ["..."]
     }
   ],
-  "whatTheyDoBetter": ["konkrete Punkte was TOP 3 besser machen"],
-  "whereWeAreStrong": ["unsere echten Stärken"],
+  "whatTheyDoBetter": ["konkrete Punkte was die über uns platzierten besser machen"],
+  "whereWeAreStrong": ["unsere echten Stärken basierend auf den Daten"],
   "actionPlan": [
     {
       "priority": "high|medium|low",
-      "action": "Konkrete Maßnahme",
+      "action": "Konkrete Maßnahme um Positionen zu gewinnen",
       "impact": "Erwarteter Effekt",
       "effort": "Aufwand: niedrig|mittel|hoch"
     }
   ],
-  "contentGaps": ["Themen die TOP 10 abdecken, wir aber nicht"],
-  "estimatedTimeToTop10": "Einschätzung in Monaten"
+  "contentGaps": ["Themen die die über uns platzierten abdecken, wir aber nicht"],
+  "estimatedTimeToTop10": "Wenn schon TOP 10: 'Bereits TOP 10 — TOP 3 in ca. X Monaten'. Sonst: 'ca. X Monate'"
 }
 
 Antworte NUR in validem JSON.`,
