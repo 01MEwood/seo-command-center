@@ -1,4 +1,4 @@
-name: Ship-It Deploy SEO Command Center
+name: Ship-It Deploy SEO Command Center v5
 
 on:
   push:
@@ -48,3 +48,9 @@ jobs:
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             CORS_ORIGIN=https://seo.meosapp.de
             JWT_SECRET=${{ secrets.JWT_SECRET }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REFRESH_TOKEN=${{ secrets.GOOGLE_REFRESH_TOKEN }}
+            DATAFORSEO_LOGIN=${{ secrets.DATAFORSEO_LOGIN }}
+            DATAFORSEO_PASSWORD=${{ secrets.DATAFORSEO_PASSWORD }}
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}

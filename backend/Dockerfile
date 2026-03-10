@@ -1,21 +1,9 @@
 FROM node:20-alpine
+RUN apk add --no-cache openssl curl
 WORKDIR /app
-
-# Install curl for healthchecks + openssl for Prisma
-RUN apk add --no-cache curl openssl openssl-dev
-
-# Dependencies first (cache layer)
-COPY package*.json ./
-COPY prisma ./prisma/
-RUN npm install --omit=dev
-RUN npx prisma generate
-
-# Copy source
+COPY package.json ./
+RUN npm install
 COPY . .
-
-# Create logs directory
-RUN mkdir -p logs
-
+RUN npx prisma generate
 EXPOSE 4000
-
-CMD ["node", "src/index.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node src/index.js"]

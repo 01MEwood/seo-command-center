@@ -1,76 +1,79 @@
-# SEO Command Center v4.1
-## Schreinerhelden × Ihr Möbel-Schreiner
+# SEO Command Center v5.0
 
-Dual-Domain SEO/AEO/GEO Tool mit 8 Weltklasse-Experten-Frameworks und 9 API-Integrationen.
+**Schreinerhelden GmbH & Co. KG** — seo.meosapp.de
 
-**Live:** https://seo.meosapp.de
+Analyse · Content · Tracking — Ein scharfes SEO-Werkzeug.
 
----
+## Was ist das?
+
+Ein Tool zum:
+1. **Analysieren** — Keyword + Region → TOP 10 Wettbewerber, Suchvolumen, Longtails, AEO-Fragen
+2. **Bauen** — GPT-4o generiert SEO-optimierte Artikel für Position 1
+3. **Tracken** — Position-Monitoring über Zeit
 
 ## Stack
 
-- **Frontend:** React 18 + Vite + Tailwind CSS + Recharts
-- **Backend:** Node.js + Express + Prisma ORM
-- **Database:** PostgreSQL 16
-- **Infra:** Docker + Traefik + Hostinger VPS
+- **Frontend:** React + Vite + Tailwind (Outfit Font)
+- **Backend:** Express + Prisma + PostgreSQL
+- **APIs:** DataForSEO, OpenAI GPT-4o, Google Search Console
+- **Deploy:** Docker Hub → Hostinger VPS (GitHub Actions CI/CD)
 
-## APIs
+## Architektur (v5.0 vs v4.1)
 
-| API | Funktion |
-|-----|----------|
-| Google Search Console | Live-Daten, täglicher Cron |
-| PageSpeed Insights | Core Web Vitals |
-| Google Indexing API | Seiten indexieren |
-| DataForSEO | Keywords, SERP, Backlinks |
-| OpenAI (GPT-4o) | Longtails, Content Studio |
-| Anthropic (Claude) | Expert Audits (8 Frameworks) |
+| | v4.1 | v5.0 |
+|---|---|---|
+| Frontend | 1.157 Zeilen in einer Datei | 6 Module, 8 Components, Services-Layer |
+| API Keys | Im Browser (localStorage) | Serverseitig (.env) |
+| Backend | 670 Zeilen in einer Datei | 10 Route-Dateien, 4 Services |
+| Wettbewerber | GPT-only (Halluzination) | DataForSEO SERP + Volume + Backlinks |
+| Tracking | Nicht vorhanden | Position-Snapshots über Zeit |
+| Tabs | 11 (davon 5 Placeholder) | 6 (alle funktional) |
 
-## Deployment
+## Module
 
-### 1. Build & Push (Windows)
+| Tab | Funktion |
+|---|---|
+| **Dashboard** | KPIs, System-Status, letzte Analysen |
+| **Analyse** | Keyword+Region → SERP → Volume → Longtails → AEO → Content |
+| **Keywords** | Recherche (DataForSEO), Longtails (GPT-4o), GSC Live |
+| **Content** | SEO-Artikel generieren |
+| **Tracking** | Position-Monitoring mit Sparkline-Charts |
+| **Settings** | System-Status, Service-Health |
+
+## Setup (Lokal)
 
 ```bash
-bash build-and-push.sh
+# Backend
+cd backend
+cp ../.env.example .env  # Keys eintragen!
+npm install
+npx prisma db push
+npm run dev
+
+# Frontend (neues Terminal)
+cd frontend
+npm install
+npm run dev
 ```
 
-### 2. Deploy (VPS)
+→ http://localhost:3000 (Login: admin / schreinerhelden2026)
+
+## Deploy (Produktion)
+
+Push auf `main` → GitHub Actions baut Docker Images → Deploy auf Hostinger VPS.
 
 ```bash
-ssh root@31.97.122.6
-cd /opt/seo-command-center
-# Erstmalig: cp .env.example .env && nano .env
-bash deploy.sh
+# Manuell (falls nötig)
+docker build -t memario/seo-command-center-backend:latest ./backend
+docker build -t memario/seo-command-center-frontend:latest ./frontend
+docker push memario/seo-command-center-backend:latest
+docker push memario/seo-command-center-frontend:latest
 ```
 
-### DNS
+## Datenbank-Modelle
 
-A-Record: `seo.meosapp.de` → `31.97.122.6` (bereits gesetzt)
-
----
-
-## API Endpunkte
-
-| Methode | Pfad | Beschreibung |
-|---------|------|-------------|
-| GET | `/api/health` | Health Check + DB Status |
-| GET | `/api/domains` | Domains (auto-seed) |
-| GET | `/api/gsc/:domain` | GSC Daten (live) |
-| GET | `/api/gsc/:domain/pages` | GSC nach Seiten |
-| GET | `/api/pagespeed/:url` | Core Web Vitals |
-| POST | `/api/indexing/request` | Seite indexieren |
-| POST | `/api/dataforseo/keywords` | Keyword-Recherche |
-| POST | `/api/dataforseo/serp` | SERP-Analyse |
-| POST | `/api/dataforseo/backlinks` | Backlink-Check |
-| POST | `/api/ai/expert-audit` | KI Expert-Analyse (Claude) |
-| POST | `/api/ai/longtails` | Longtail-Generierung (GPT-4o) |
-| POST | `/api/ai/content` | Content-Generierung (GPT-4o) |
-| GET | `/api/keywords` | Keywords CRUD |
-| GET | `/api/articles` | Artikel-Plan |
-| GET | `/api/competitors` | Wettbewerber |
-| GET | `/api/cannibalization` | Kannibalisierungs-Risiken |
-| GET | `/api/audits/:domainId` | Audit-Scores |
-
-## Docker Hub
-
-- `mariodocker/seo-command-center-frontend:latest`
-- `mariodocker/seo-command-center-backend:latest`
+- **PipelineRun** — Eine Analyse (Keyword+Region)
+- **SerpResult** — SERP-Position eines Wettbewerbers
+- **TrackedKeyword** — Keyword im Position-Monitoring
+- **PositionSnapshot** — Täglicher Positions-Check
+- **GscDataPoint** — GSC-Daten (automatisch via Cron)

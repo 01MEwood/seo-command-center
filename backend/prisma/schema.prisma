@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ── Domains (schreinerhelden.de / ihr-moebel-schreiner.de) ──
+// ── Domains ──
 model Domain {
   id        String   @id @default(cuid())
   name      String
@@ -15,38 +15,38 @@ model Domain {
   color     String
   createdAt DateTime @default(now())
 
-  keywords    Keyword[]
-  articles    Article[]
-  gscData     GscDataPoint[]
-  auditScores AuditScore[]
+  keywords     Keyword[]
+  articles     Article[]
+  gscData      GscDataPoint[]
+  pipelineRuns PipelineRun[]
+  trackings    TrackedKeyword[]
 }
 
-// ── Keywords with territory ownership ──
+// ── Keywords ──
 model Keyword {
   id        String   @id @default(cuid())
   keyword   String
-  cluster   String
+  cluster   String?
   volume    Int      @default(0)
+  cpc       Float    @default(0)
   kd        Int      @default(0)
-  intent    String   // informational, transactional, comparison, local
-  funnel    String   // top, middle, bottom
-  trend     String   @default("stable") // rising, stable, falling, new
+  intent    String?
+  trend     String   @default("stable")
   domainId  String
   domain    Domain   @relation(fields: [domainId], references: [id])
-  status    String   @default("planned") // planned, priority, live
+  status    String   @default("planned")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  gscData GscDataPoint[]
-  article Article?       @relation(fields: [articleId], references: [id])
+  article   Article? @relation(fields: [articleId], references: [id])
   articleId String?
+  gscData   GscDataPoint[]
 
   @@unique([keyword, domainId])
-  @@index([cluster])
   @@index([domainId])
 }
 
-// ── Articles / Content Plan ──
+// ── Articles ──
 model Article {
   id        String   @id @default(cuid())
   number    Int
@@ -54,23 +54,10 @@ model Article {
   slug      String
   domainId  String
   domain    Domain   @relation(fields: [domainId], references: [id])
-  status    String   @default("planned") // planned, priority, draft, review, live
-  funnel    String   // ToFu, MoFu, BoFu
-  type      String   // Ratgeber, Landingpage, Vergleich, B2B
-  expertId  String   // which expert "owns" this article's strategy
-  
-  // SEO metadata
-  titleTag       String?
-  metaDescription String?
-  urlSlug        String?
-  wordCount      Int?
-  
-  // Scores (from expert frameworks)
-  skyscraperScore  Int?  // Brian Dean
-  schemaScore      Int?  // Mike King
-  entityScore      Int?  // Jason Barnard
-  eeatScore        Int?  // Lily Ray
-  
+  status    String   @default("planned")
+  type      String
+  content   String?
+  wordCount Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -79,7 +66,7 @@ model Article {
   @@index([domainId])
 }
 
-// ── GSC Data (daily snapshots) ──
+// ── GSC Daily Data ──
 model GscDataPoint {
   id          String   @id @default(cuid())
   date        DateTime
@@ -92,55 +79,99 @@ model GscDataPoint {
   domain      Domain   @relation(fields: [domainId], references: [id])
   keywordId   String?
   keyword     Keyword? @relation(fields: [keywordId], references: [id])
-  
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 
   @@unique([date, query, domainId])
   @@index([domainId, date])
   @@index([query])
 }
 
-// ── Expert Audit Scores (per domain, per expert framework) ──
-model AuditScore {
+// ═══════════════════════════════════════════════════
+// NEW: Ranking Pipeline
+// ═══════════════════════════════════════════════════
+
+// A pipeline run = one "Keyword + Region" analysis
+model PipelineRun {
   id        String   @id @default(cuid())
+  keyword   String
+  region    String
   domainId  String
   domain    Domain   @relation(fields: [domainId], references: [id])
-  expertId  String   // dean, king, barnard, ray, fishkin, krum, irwin, dunford
-  framework String
-  score     Int      // 0-100
-  details   String?  // JSON with individual check results
-  createdAt DateTime @default(now())
-
-  @@index([domainId, expertId])
-}
-
-// ── Competitor Tracking ──
-model Competitor {
-  id         String @id @default(cuid())
-  name       String
-  domainUrl  String @unique
-  da         Int    @default(0)
-  keywords   Int    @default(0)
-  traffic    Int    @default(0)
-  threatTo   String // sh, ims, both
-  strength   String
-  weakness   String
+  status    String   @default("running") // running, complete, error
+  
+  // Aggregated data
+  searchVolume   Int?
+  cpc            Float?
+  competition    String?
+  ourPosition    Int?       // Where we rank (null = not found)
+  ourUrl         String?    // Which URL ranks
+  totalResults   Int?
+  
+  // AI-generated content
+  longtails      Json?      // Array of longtail suggestions
+  aeoQuestions   Json?      // People Also Ask suggestions
+  contentDraft   String?    // Generated article draft
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  serpResults SerpResult[]
+
+  @@index([keyword, region])
+  @@index([domainId])
 }
 
-// ── Cannibalization Risks ──
-model CannibalRisk {
+// Individual SERP position within a pipeline run
+model SerpResult {
+  id            String   @id @default(cuid())
+  pipelineRunId String
+  pipelineRun   PipelineRun @relation(fields: [pipelineRunId], references: [id], onDelete: Cascade)
+  
+  position      Int
+  url           String
+  domain        String
+  title         String
+  snippet       String?
+  isOurs        Boolean  @default(false)
+  
+  // Enrichment (optional, fetched separately)
+  backlinks     Int?
+  da            Int?
+  
+  createdAt DateTime @default(now())
+
+  @@index([pipelineRunId])
+}
+
+// ═══════════════════════════════════════════════════
+// NEW: Position Tracking over Time
+// ═══════════════════════════════════════════════════
+
+model TrackedKeyword {
   id       String @id @default(cuid())
   keyword  String
-  risk     String // hoch, mittel, niedrig
-  shPage   String
-  imsPage  String
-  solution String
-  expertId String
-  status   String @default("open") // open, resolved, monitoring
+  region   String
+  domainId String
+  domain   Domain @relation(fields: [domainId], references: [id])
+  active   Boolean @default(true)
   
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  snapshots PositionSnapshot[]
+
+  @@unique([keyword, region, domainId])
+  @@index([domainId])
+}
+
+model PositionSnapshot {
+  id               String   @id @default(cuid())
+  trackedKeywordId String
+  trackedKeyword   TrackedKeyword @relation(fields: [trackedKeywordId], references: [id], onDelete: Cascade)
+  
+  position         Int?     // null = not found
+  url              String?  // which URL ranked
+  searchVolume     Int?
+  date             DateTime @default(now())
+
+  @@index([trackedKeywordId, date])
 }

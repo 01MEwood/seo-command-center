@@ -1,28 +1,26 @@
 {
-  "name": "seo-command-backend",
-  "version": "4.1.0",
+  "name": "seo-command-center-backend",
+  "version": "5.0.0",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "prisma:generate": "npx prisma generate",
-    "prisma:push": "npx prisma db push",
-    "prisma:migrate": "npx prisma migrate deploy"
+    "start": "node src/index.js",
+    "db:push": "npx prisma db push",
+    "db:generate": "npx prisma generate",
+    "db:studio": "npx prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
-    "@anthropic-ai/sdk": "^0.30.0",
+    "@prisma/client": "^6.1.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
-    "helmet": "^8.0.0",
-    "jsonwebtoken": "^9.0.2",
     "googleapis": "^144.0.0",
+    "helmet": "^8.0.0",
     "node-cron": "^3.0.3",
-    "openai": "^4.70.0",
+    "openai": "^4.77.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "prisma": "^5.22.0"
+    "prisma": "^6.1.0"
   }
 }
