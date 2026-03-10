@@ -302,3 +302,119 @@ GEO (0-100):
 OVERALL = (SEO × 0.4) + (AEO × 0.3) + (GEO × 0.3), gerundet
 
 Antworte NUR in validem JSON.`;
+
+
+// ═══════════════════════════════════════════════════════
+// 6. SOCIAL CONTENT MULTIPLIER
+// ═══════════════════════════════════════════════════════
+
+export const SOCIAL_SYSTEM =
+`Du erstellst Social Media Content für Schreinerhelden — eine authentische Handwerker-Marke in Murrhardt bei Stuttgart.
+STIL: Echt, handwerklich, nahbar aber premium. Team-Sprache ("Unser Team", "Mario Esch als Ansprechpartner mit eingespieletem Team").
+KEIN Corporate-Sprech. Du-Ansprache.
+Emojis sparsam und nur wo passend.
+Kontakt: 07192/9789012 | https://schreinerhelden.de/termin`;
+
+export const SOCIAL_CHANNELS = {
+  gbp: {
+    name: 'Google Business Profile',
+    prompt: (keyword, region, lpSummary) =>
+`Erstelle einen Google Business Profile Post basierend auf diesem Landing Page Content:
+KEYWORD: ${keyword}
+REGION: ${region}
+LP-INHALT: ${lpSummary}
+
+REGELN:
+- Max 1.500 Zeichen
+- Lokaler Bezug zu ${region} und Umgebung
+- Handwerker-Ton, authentisch
+- CTA: "Jetzt kostenlosen Planungstermin buchen" + Link https://schreinerhelden.de/termin
+- 1 passender Emoji am Anfang
+- Kein Hashtag-Spam
+
+Antworte NUR mit dem Post-Text.`
+  },
+
+  instagram: {
+    name: 'Instagram / Facebook',
+    prompt: (keyword, region, lpSummary) =>
+`Erstelle einen Instagram/Facebook Post basierend auf diesem Landing Page Content:
+KEYWORD: ${keyword}
+REGION: ${region}
+LP-INHALT: ${lpSummary}
+
+REGELN:
+- Caption: max 2.200 Zeichen, Story-Element einbauen (Kundenproblem → Lösung)
+- Erste Zeile = Hook (macht neugierig, kein Clickbait)
+- Absätze mit Zeilenumbrüchen für Lesbarkeit
+- CTA: "Link in Bio" oder "Schreib uns eine DM"
+- 15-20 relevante Hashtags am Ende (getrennt durch Zeile)
+- 3-5 passende Emojis im Text verteilt
+- Bildbeschreibungs-Vorschlag für das Bild (was soll gezeigt werden?)
+- Posting-Zeit Empfehlung
+
+Format als JSON:
+{
+  "caption": "...",
+  "hashtags": "#tag1 #tag2 ...",
+  "imageIdea": "Beschreibung was auf dem Bild/Foto zu sehen sein sollte",
+  "bestTime": "z.B. Dienstag 18:00"
+}`
+  },
+
+  pinterest: {
+    name: 'Pinterest',
+    prompt: (keyword, region, lpSummary) =>
+`Erstelle einen Pinterest Pin basierend auf diesem Landing Page Content:
+KEYWORD: ${keyword}
+REGION: ${region}
+LP-INHALT: ${lpSummary}
+
+REGELN:
+- Pin-Titel: max 100 Zeichen, keyword-optimiert für Pinterest-Suche
+- Pin-Beschreibung: max 500 Zeichen, Keywords für Home Decor / Interior Design Suche
+- Board-Vorschlag: welches Pinterest Board passt?
+- Bild-Vorschlag: was soll das Pin-Bild zeigen? (Pinterest = visuell!)
+- Link: relevante URL auf schreinerhelden.de
+- Alt-Text für Barrierefreiheit
+
+Format als JSON:
+{
+  "title": "...",
+  "description": "...",
+  "board": "...",
+  "imageIdea": "...",
+  "link": "https://schreinerhelden.de/...",
+  "altText": "..."
+}`
+  },
+
+  blog: {
+    name: 'Blog-Artikel',
+    prompt: (keyword, region, lpSummary) =>
+`Erstelle einen Blog-Artikel für schreinerhelden.de/blog basierend auf diesem Landing Page Content:
+KEYWORD: ${keyword}
+REGION: ${region}
+LP-INHALT: ${lpSummary}
+
+REGELN:
+- Anderer Blickwinkel als die LP — KEIN Duplikat-Content!
+- Blog = informativ/unterhaltsam, LP = verkaufend
+- Mögliche Blickwinkel: Kundenstory, Einblick in die Werkstatt, Materialwahl, Vorher-Nachher, Tipps & Tricks
+- 800-1.200 Wörter (kürzer als LP!)
+- H1 (Blog-Titel, catchy, nicht zu SEO-lastig)
+- 3-4 H2 Unterabschnitte
+- Du-Ansprache, locker, als würde Mario erzählen
+- Interner Link zur LP: "Mehr dazu auf unserer [Service]-Seite"
+- CTA am Ende: Termin buchen
+- Meta Title + Meta Description als Kommentar oben
+
+Format: Markdown`
+  },
+};
+
+export const SOCIAL_MULTIPLIER_USER = (channel, keyword, region, lpSummary) => {
+  const ch = SOCIAL_CHANNELS[channel];
+  if (!ch) throw new Error(`Unknown channel: ${channel}`);
+  return ch.prompt(keyword, region, lpSummary);
+};

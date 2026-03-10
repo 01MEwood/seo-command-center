@@ -159,4 +159,43 @@ router.post('/aeo-questions', async (req, res) => {
   }
 });
 
+// ── Social Content Multiplier ──
+router.post('/social', async (req, res) => {
+  try {
+    const { channel, keyword, region, lpSummary } = req.body;
+    if (!channel || !keyword) return res.status(400).json({ error: 'Channel and keyword required' });
+
+    log.info(`Social content: ${channel} for "${keyword}"`);
+    const result = await ai.generateSocialContent(channel, keyword, region || '', lpSummary || '');
+    res.json({ channel, keyword, region, content: result });
+  } catch (error) {
+    log.error('Social content error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── Bulk Social: All channels at once ──
+router.post('/social/bulk', async (req, res) => {
+  try {
+    const { keyword, region, lpSummary, channels = ['gbp', 'instagram', 'pinterest', 'blog'] } = req.body;
+    if (!keyword) return res.status(400).json({ error: 'Keyword required' });
+
+    log.info(`Bulk social: ${channels.join(', ')} for "${keyword}"`);
+    const results = {};
+    for (const ch of channels) {
+      try {
+        results[ch] = await ai.generateSocialContent(ch, keyword, region || '', lpSummary || '');
+      } catch (e) {
+        results[ch] = { error: e.message };
+        log.warn(`Social ${ch} failed:`, e.message);
+      }
+    }
+
+    res.json({ keyword, region, channels: results });
+  } catch (error) {
+    log.error('Bulk social error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

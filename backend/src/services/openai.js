@@ -69,3 +69,15 @@ export async function generateCompetitorDiagnosis(keyword, region, serpResults, 
   const result = await chat(P.DIAGNOSIS_SYSTEM, P.DIAGNOSIS_USER(keyword, region, serpResults, ourData, competitorData), { json: true, temperature: 0.7, maxTokens: 3000 });
   return JSON.parse(result);
 }
+
+// ── Social Content Multiplier ──
+export async function generateSocialContent(channel, keyword, region, lpSummary) {
+  const userPrompt = P.SOCIAL_MULTIPLIER_USER(channel, keyword, region, lpSummary);
+  const isJson = ['instagram', 'pinterest'].includes(channel);
+  const result = await chat(P.SOCIAL_SYSTEM, userPrompt, {
+    temperature: 0.8,
+    maxTokens: 2000,
+    json: isJson,
+  });
+  return isJson ? JSON.parse(result) : result;
+}

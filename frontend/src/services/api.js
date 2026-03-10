@@ -97,6 +97,12 @@ export const aiLongtails = (seedKeyword, domain = 'sh') =>
 export const aiAeoQuestions = (keyword) =>
   request('/ai/aeo-questions', { method: 'POST', body: { keyword } });
 
+export const aiSocial = (channel, keyword, region, lpSummary) =>
+  request('/ai/social', { method: 'POST', body: { channel, keyword, region, lpSummary }, timeout: 90000 });
+
+export const aiSocialBulk = (keyword, region, lpSummary, channels) =>
+  request('/ai/social/bulk', { method: 'POST', body: { keyword, region, lpSummary, channels }, timeout: 180000 });
+
 // ── Google Search Console ──
 export const gscQueries = (domain) =>
   request(`/gsc/${domain}`);
