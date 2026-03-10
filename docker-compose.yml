@@ -1,7 +1,6 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: seo_db
     restart: always
     environment:
       POSTGRES_DB: ${DB_NAME:-seo_command}
@@ -18,8 +17,7 @@ services:
       - seo_net
 
   backend:
-    build: ./backend
-    container_name: seo_backend
+    image: memario/seo-command-center-backend:latest
     restart: always
     depends_on:
       db:
@@ -36,7 +34,7 @@ services:
       DATAFORSEO_PASSWORD: ${DATAFORSEO_PASSWORD:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      JWT_SECRET: ${JWT_SECRET:-defaultsecret}
+      JWT_SECRET: ${JWT_SECRET:-changeme}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
       interval: 30s
@@ -47,8 +45,7 @@ services:
       - seo_net
 
   frontend:
-    build: ./frontend
-    container_name: seo_frontend
+    image: memario/seo-command-center-frontend:latest
     restart: always
     depends_on:
       - backend
