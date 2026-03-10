@@ -5,7 +5,7 @@
 
 export const APP = {
   name: 'MEOS:SEO',
-  version: 'v5.4',
+  version: 'v5.5.4',
   subtitle: 'Analyse · Content · Tracking',
 };
 

@@ -16,6 +16,7 @@ export default function Content() {
     { id: 'landingpage', label: 'Landing Page' },
     { id: 'social', label: 'Social Multiplier' },
     { id: 'article', label: 'Artikel' },
+    { id: 'schema', label: '🏷️ Schema.org' },
     { id: 'prompts', label: '⚙️ Prompt Editor' },
   ];
 
@@ -29,6 +30,7 @@ export default function Content() {
       {tab === 'landingpage' && <LandingPageGenerator />}
       {tab === 'social' && <SocialMultiplier />}
       {tab === 'article' && <ArticleGenerator />}
+      {tab === 'schema' && <SchemaGenerator />}
       {tab === 'prompts' && <PromptEditor />}
     </div>
   );
@@ -392,7 +394,342 @@ function ArticleGenerator() {
 }
 
 // ═══════════════════════════════════════════════════════
-// TAB 4: PROMPT EDITOR
+// TAB 4: SCHEMA.ORG GENERATOR
+// ═══════════════════════════════════════════════════════
+
+const SCHEMA_TYPES = [
+  { id: 'localBusiness', label: 'LocalBusiness', icon: '🏢', desc: 'Firmen-Stammdaten für Google Knowledge Panel' },
+  { id: 'service', label: 'Service', icon: '🔧', desc: 'Dienstleistung mit Keyword + Region' },
+  { id: 'faq', label: 'FAQPage', icon: '❓', desc: 'FAQ-Schema für Featured Snippets (GPT-generiert)' },
+  { id: 'breadcrumb', label: 'BreadcrumbList', icon: '🔗', desc: 'Breadcrumb-Navigation für Google' },
+  { id: 'article', label: 'Article', icon: '📰', desc: 'Blog-Artikel / Ratgeber Markup' },
+  { id: 'product', label: 'Product', icon: '📦', desc: 'Produkt mit Preisrahmen (AggregateOffer)' },
+];
+
+function SchemaGenerator() {
+  const [keyword, setKeyword] = useState('');
+  const [region, setRegion] = useState('Stuttgart');
+  const [domain, setDomain] = useState('sh');
+  const [selectedTypes, setSelectedTypes] = useState(['localBusiness', 'service', 'faq', 'breadcrumb']);
+  const [articleTitle, setArticleTitle] = useState('');
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [validating, setValidating] = useState(null);
+  const [validationResults, setValidationResults] = useState({});
+  const [expandedSchema, setExpandedSchema] = useState(null);
+  const [editingFaq, setEditingFaq] = useState(null);
+
+  const toggleType = (id) => {
+    setSelectedTypes(prev =>
+      prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]
+    );
+  };
+
+  const generate = async () => {
+    if (!keyword.trim() || selectedTypes.length === 0) return;
+    setLoading(true); setError(null); setResult(null); setValidationResults({});
+    try {
+      const data = await api.schemaGenerate(keyword, region, domain, selectedTypes, {
+        articleTitle: articleTitle || undefined,
+        priceMin: priceMin ? Number(priceMin) : undefined,
+        priceMax: priceMax ? Number(priceMax) : undefined,
+      });
+      setResult(data);
+    } catch (e) { setError(e.message); }
+    setLoading(false);
+  };
+
+  const validate = async (key, schema) => {
+    setValidating(key);
+    try {
+      const res = await api.schemaValidate(schema);
+      setValidationResults(prev => ({ ...prev, [key]: res }));
+    } catch (e) {
+      setValidationResults(prev => ({ ...prev, [key]: { valid: false, errors: [e.message], warnings: [] } }));
+    }
+    setValidating(null);
+  };
+
+  const copyJson = (obj) => navigator.clipboard.writeText(JSON.stringify(obj, null, 2));
+  const copyHtml = () => { if (result?.html) navigator.clipboard.writeText(result.html); };
+
+  const showProductFields = selectedTypes.includes('product');
+  const showArticleFields = selectedTypes.includes('article');
+
+  return (
+    <>
+      <Card title="Schema.org Generator">
+        <p className="text-gray-500 text-xs mb-4">
+          Generiert valides JSON-LD Schema.org Markup für deine Seiten.
+          LocalBusiness + Service + FAQ = Basis-Setup für jede Landing Page.
+          Alles deterministic — kein GPT-Raten. FAQ-Fragen werden optional per GPT erzeugt.
+        </p>
+
+        <div className="grid grid-cols-12 gap-4 items-end mb-4">
+          <Input className="col-span-4" label="Keyword" value={keyword} onChange={setKeyword}
+            placeholder="z.B. Einbauschrank nach Maß" onKeyDown={e => e.key === 'Enter' && !loading && generate()} />
+          <Select className="col-span-3" label="Region" value={region} onChange={setRegion}
+            options={REGIONS.map(r => ({ value: r.name, label: r.name }))} />
+          <Select className="col-span-2" label="Domain" value={domain} onChange={setDomain}
+            options={[{ value: 'sh', label: 'SH' }, { value: 'ims', label: 'IMS' }]} />
+          <div className="col-span-3">
+            <Btn onClick={generate} disabled={loading || !keyword.trim() || selectedTypes.length === 0} className="w-full justify-center">
+              {loading ? <><Spinner /> Generiere...</> : `🏷️ ${selectedTypes.length} Schemas`}
+            </Btn>
+          </div>
+        </div>
+
+        {/* Schema Type Selection */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {SCHEMA_TYPES.map(st => {
+            const selected = selectedTypes.includes(st.id);
+            return (
+              <button key={st.id} onClick={() => toggleType(st.id)}
+                className={`text-left p-3 rounded-lg border transition-all ${
+                  selected
+                    ? 'border-blue-500/50 bg-blue-900/15'
+                    : 'border-gray-800/40 bg-gray-800/10 hover:border-gray-700/60'
+                }`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">{st.icon}</span>
+                  <span className={`text-xs font-medium ${selected ? 'text-blue-400' : 'text-gray-400'}`}>{st.label}</span>
+                  {selected && <span className="text-blue-400 text-[10px] ml-auto">✓</span>}
+                </div>
+                <p className="text-gray-600 text-[10px] mt-1">{st.desc}</p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Conditional extra fields */}
+        {(showArticleFields || showProductFields) && (
+          <div className="grid grid-cols-12 gap-4 items-end border-t border-gray-800/30 pt-4">
+            {showArticleFields && (
+              <Input className="col-span-6" label="Artikel-Titel (optional)" value={articleTitle}
+                onChange={setArticleTitle} placeholder="z.B. Was kostet ein Einbauschrank nach Maß?" />
+            )}
+            {showProductFields && (
+              <>
+                <Input className="col-span-3" label="Preis ab (€)" value={priceMin}
+                  onChange={setPriceMin} placeholder="z.B. 2500" />
+                <Input className="col-span-3" label="Preis bis (€)" value={priceMax}
+                  onChange={setPriceMax} placeholder="z.B. 15000" />
+              </>
+            )}
+          </div>
+        )}
+      </Card>
+
+      <ErrorBox message={error} onDismiss={() => setError(null)} />
+
+      {loading && (
+        <Card>
+          <div className="text-center py-6">
+            <Spinner size="md" />
+            <p className="text-blue-400 text-sm mt-3">Schema.org Markup generieren...</p>
+            {selectedTypes.includes('faq') && <p className="text-gray-600 text-xs mt-1">FAQ-Fragen werden per GPT erzeugt...</p>}
+          </div>
+        </Card>
+      )}
+
+      {/* Results */}
+      {result && (
+        <>
+          {/* Summary Bar */}
+          <Card>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Badge color="green">{result.schemaCount} Schemas generiert</Badge>
+                <span className="text-gray-500 text-xs">für "{result.keyword}" · {result.region}</span>
+              </div>
+              <div className="flex gap-2">
+                <Btn size="sm" onClick={copyHtml}>📋 Alle als HTML kopieren</Btn>
+                <Btn size="sm" variant="secondary" onClick={() => {
+                  const blob = new Blob([result.html], { type: 'text/html' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url; a.download = `schema-${keyword.replace(/\s+/g, '-').toLowerCase()}.html`;
+                  a.click(); URL.revokeObjectURL(url);
+                }}>💾 Download</Btn>
+              </div>
+            </div>
+          </Card>
+
+          {/* Individual Schema Cards */}
+          {Object.entries(result.schemas)
+            .filter(([k, v]) => v && !k.startsWith('_'))
+            .map(([key, schema]) => {
+              const typeInfo = SCHEMA_TYPES.find(t => t.id === key);
+              const validation = validationResults[key];
+              const isExpanded = expandedSchema === key;
+
+              return (
+                <Card key={key} title={`${typeInfo?.icon || '📄'} ${typeInfo?.label || key}`} actions={
+                  <div className="flex gap-1.5">
+                    <Btn size="xs" variant="ghost" onClick={() => validate(key, schema)} disabled={validating === key}>
+                      {validating === key ? <Spinner /> : validation?.valid ? '✅' : '🔍'} Prüfen
+                    </Btn>
+                    <Btn size="xs" variant="ghost" onClick={() => copyJson(schema)}>📋</Btn>
+                    <Btn size="xs" variant="ghost" onClick={() => setExpandedSchema(isExpanded ? null : key)}>
+                      {isExpanded ? '▼' : '▶'}
+                    </Btn>
+                  </div>
+                }>
+                  {/* Validation Results */}
+                  {validation && (
+                    <div className={`mb-3 p-3 rounded-lg text-xs ${
+                      validation.valid ? 'bg-emerald-900/15 border border-emerald-800/30' : 'bg-red-900/15 border border-red-800/30'
+                    }`}>
+                      <p className={`font-medium ${validation.valid ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {validation.valid ? '✅ Schema valide' : `❌ ${validation.errors.length} Fehler`}
+                        {validation.warnings?.length > 0 && ` · ${validation.warnings.length} Hinweise`}
+                      </p>
+                      {validation.errors?.map((e, i) => (
+                        <p key={i} className="text-red-400/80 mt-1">• {e}</p>
+                      ))}
+                      {validation.warnings?.map((w, i) => (
+                        <p key={i} className="text-yellow-400/60 mt-1">⚠ {w}</p>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Compact preview */}
+                  {!isExpanded && (
+                    <div className="text-gray-500 text-xs font-mono bg-gray-800/30 rounded-lg px-3 py-2 truncate">
+                      @type: {Array.isArray(schema['@type']) ? schema['@type'].join(', ') : schema['@type']}
+                      {schema.name ? ` · name: "${schema.name}"` : ''}
+                      {schema.headline ? ` · headline: "${schema.headline}"` : ''}
+                    </div>
+                  )}
+
+                  {/* Full JSON */}
+                  {isExpanded && (
+                    <pre className="text-gray-400 text-xs bg-gray-800/30 rounded-lg p-4 max-h-[500px] overflow-auto font-mono leading-relaxed whitespace-pre-wrap">
+                      {JSON.stringify(schema, null, 2)}
+                    </pre>
+                  )}
+                </Card>
+              );
+            })}
+
+          {/* Generated FAQ Questions (editable) */}
+          {result.schemas._generatedQuestions && (
+            <Card title="❓ Generierte FAQ-Fragen" actions={
+              <Btn size="xs" variant="secondary" onClick={() => setEditingFaq(
+                editingFaq ? null : [...result.schemas._generatedQuestions]
+              )}>
+                {editingFaq ? 'Abbrechen' : '✏️ Bearbeiten'}
+              </Btn>
+            }>
+              <p className="text-gray-500 text-xs mb-3">
+                Diese Fragen wurden per GPT-4o generiert. Du kannst sie anpassen und das Schema neu erzeugen.
+              </p>
+              <div className="space-y-3">
+                {(editingFaq || result.schemas._generatedQuestions).map((q, i) => (
+                  <div key={i} className="border-l-2 border-blue-600/30 pl-4">
+                    {editingFaq ? (
+                      <>
+                        <input value={editingFaq[i].question}
+                          onChange={e => {
+                            const copy = [...editingFaq];
+                            copy[i] = { ...copy[i], question: e.target.value };
+                            setEditingFaq(copy);
+                          }}
+                          className="w-full bg-gray-800/80 border border-gray-700/60 rounded px-3 py-1.5 text-white text-sm mb-1" />
+                        <textarea value={editingFaq[i].answer}
+                          onChange={e => {
+                            const copy = [...editingFaq];
+                            copy[i] = { ...copy[i], answer: e.target.value };
+                            setEditingFaq(copy);
+                          }}
+                          className="w-full bg-gray-800/80 border border-gray-700/60 rounded px-3 py-1.5 text-gray-300 text-xs resize-y h-16" />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-white text-sm font-medium">{q.question}</p>
+                        <p className="text-gray-400 text-xs mt-1 leading-relaxed">{q.answer}</p>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {editingFaq && (
+                <div className="mt-4 flex justify-end">
+                  <Btn size="sm" onClick={async () => {
+                    setLoading(true); setError(null);
+                    try {
+                      const data = await api.schemaGenerate(keyword, region, domain, selectedTypes, {
+                        faqQuestions: editingFaq,
+                        articleTitle: articleTitle || undefined,
+                        priceMin: priceMin ? Number(priceMin) : undefined,
+                        priceMax: priceMax ? Number(priceMax) : undefined,
+                      });
+                      setResult(data);
+                      setEditingFaq(null);
+                    } catch (e) { setError(e.message); }
+                    setLoading(false);
+                  }}>
+                    🔄 Schema mit angepassten FAQs neu generieren
+                  </Btn>
+                </div>
+              )}
+            </Card>
+          )}
+
+          {/* Schema-Fehler bei FAQ */}
+          {result.schemas._faqError && (
+            <Card>
+              <div className="bg-yellow-900/10 border border-yellow-800/30 rounded-lg p-3">
+                <p className="text-yellow-400 text-xs">FAQ-Generierung fehlgeschlagen: {result.schemas._faqError}</p>
+                <p className="text-gray-500 text-[10px] mt-1">Tipp: Du kannst Fragen manuell eingeben und das FAQ-Schema separat erzeugen.</p>
+              </div>
+            </Card>
+          )}
+
+          {/* HTML Preview */}
+          <Card title="HTML-Code (komplett)" actions={
+            <Btn size="xs" variant="ghost" onClick={copyHtml}>📋</Btn>
+          }>
+            <pre className="text-gray-400 text-xs bg-gray-800/40 rounded-lg p-4 max-h-[400px] overflow-auto font-mono leading-relaxed whitespace-pre-wrap break-all">
+              {result.html}
+            </pre>
+          </Card>
+
+          {/* Einbau-Anleitung */}
+          <Card title="📋 Einbau-Anleitung">
+            <div className="space-y-3 text-xs">
+              <div className="flex gap-3 items-start">
+                <span className="text-emerald-400 font-bold shrink-0">1.</span>
+                <p className="text-gray-400"><strong className="text-gray-300">WordPress / Elementor:</strong> HTML-Widget → den gesamten Code oben einfügen. Am besten ganz oben auf der Seite, vor dem sichtbaren Content. Schema ist für Suchmaschinen, nicht für User.</p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <span className="text-emerald-400 font-bold shrink-0">2.</span>
+                <p className="text-gray-400"><strong className="text-gray-300">Testen:</strong> Google Rich Results Test → <a href="https://search.google.com/test/rich-results" target="_blank" rel="noopener" className="text-blue-400 hover:underline">search.google.com/test/rich-results</a> → URL eingeben oder HTML-Snippet einfügen.</p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <span className="text-emerald-400 font-bold shrink-0">3.</span>
+                <p className="text-gray-400"><strong className="text-gray-300">Pro Seite:</strong> Jede LP braucht ein eigenes Service + FAQ Schema. Das LocalBusiness-Schema kann site-wide im Header oder Footer eingebaut werden (einmalig).</p>
+              </div>
+            </div>
+          </Card>
+        </>
+      )}
+
+      {!result && !loading && (
+        <Card>
+          <EmptyState icon="🏷️" title="Schema.org JSON-LD Generator"
+            desc="Keyword eingeben → validiertes Markup für LocalBusiness, Service, FAQ, Breadcrumb, Article und Product. Kein GPT-Raten — strukturiert und korrekt." />
+        </Card>
+      )}
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 5: PROMPT EDITOR
 // ═══════════════════════════════════════════════════════
 
 const CATEGORY_LABELS = {

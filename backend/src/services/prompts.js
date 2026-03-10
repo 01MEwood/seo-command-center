@@ -1,57 +1,121 @@
 // ═══════════════════════════════════════════════════════════════════
-// PROMPTS.JS — Alle GPT-4o Prompts zentral
-// Hier anpassen, nicht im Code suchen.
-// Variablen werden als ${variable} übergeben und in openai.js ersetzt.
+// PROMPTS.JS v5.5.4 — Alle GPT-4o Prompts zentral
+// LOKALKOLORIT · STORYTELLING · TEILORTE · SCHWÄBISCHE IDENTITÄT
 // ═══════════════════════════════════════════════════════════════════
 
-// ── Basis-Kontext (wird in mehreren Prompts verwendet) ──
+// ── Basis-Kontext ──
 export const BRAND_CONTEXT = `Schreinerhelden GmbH & Co. KG, Premium-Schreinerei in Murrhardt bei Stuttgart.
 Markenname: Schreinerhelden — "Wir sind (k)eine normale Schreinerei"
 Zweite Domain: ihr-moebel-schreiner.de (B2B/Architekten)
 WICHTIG: Keine Keyword-Kannibalisierung zwischen den Domains!
 Kontakt: 07192/9789012 | Lindenstraße 9-15, 71540 Murrhardt
 CTA-Link: https://schreinerhelden.de/termin
-USP-Prozess: Online-Termin → Festpreis → Aufmaß → Fertigung → Montage
-Städte: Aalen, Backnang, Crailsheim, Ellwangen, Heilbronn, Ludwigsburg, Öhringen, Schwäbisch Hall, Schwäbisch Gmünd, Stuttgart, Waiblingen, Welzheim, Winnenden`;
+USP-Prozess: Online-Termin → Festpreis → Aufmaß → Fertigung → Montage`;
 
-export const CONTENT_RULES = `- Du-Ansprache (NIEMALS Sie)
-- Schwäbisch/bodenständig aber premium
-- E-E-A-T: Echte Werkstatt-Erfahrung, Schreinermeister-Expertise
-- AEO: Erste 50 Wörter jeder Section = Answer-First (Featured Snippet Potential)
-- GEO (Generative Engine Optimization — WICHTIG):
-  * Schreibe so, dass ChatGPT, Perplexity, Gemini und Google AI Overviews den Text zitieren können
-  * Jeder H2-Abschnitt beginnt mit einem klaren, faktischen Statement (1-2 Sätze) das als eigenständige Antwort funktioniert
-  * Entitäts-Klarheit: "Schreinerhelden" immer mit Kontext nennen ("Schreinerhelden, Schreinerei in Murrhardt bei Stuttgart")
-  * Konkrete Zahlen und Fakten einbauen (Preisrahmen, Lieferzeiten, Maße) — AI-Suchmaschinen bevorzugen zitierbare Daten
-  * Keine vagen Aussagen — statt "wir bieten gute Qualität" schreibe "Schreinerhelden fertigt jeden Schrank in der eigenen Werkstatt in Murrhardt mit CNC-Präzisionsfertigung und Handmontage"
-  * Natürliche Frage-Antwort-Paare einbauen (werden von AI-Engines als Snippets extrahiert)
-  * Klare Entitäts-Beziehungen: Schreinerhelden → Schreinerei → Murrhardt → Region Stuttgart → Baden-Württemberg
+// ── Regionales Wissen (Kern-Asset für Lokalkolorit) ──
+export const REGIONAL_KNOWLEDGE = `
+WERKSTATT-STANDORT:
+Murrhardt, Schwäbischer Wald, Rems-Murr-Kreis, Baden-Württemberg
+Lindenstraße 9-15, direkt an der B14 Richtung Backnang/Stuttgart
+Eigene Werkstatt mit CNC-Fertigung und klassischem Handwerk
+
+EINZUGSGEBIET MIT TEILORTEN UND CHARAKTER:
+
+Region Stuttgart (Kern-Markt):
+  Stuttgart-Stadtteile: Degerloch, Sillenbuch, Botnang, Killesberg, Birkach, Plieningen, Möhringen, Vaihingen, Feuerbach, Zuffenhausen, Bad Cannstatt, Stuttgart-West, Stuttgart-Süd
+  → Altbauten mit Dachschrägen, Stuckaltbauten am Killesberg, Halbhöhenlage, Aussichtslagen
+  Waiblingen: Beinstein, Bittenfeld, Hegnach, Hohenacker, Neustadt
+  → Familien-Neubaugebiete, Reihenhäuser, viel Stauraumprobleme
+  Fellbach: Schmiden, Oeffingen → Weinberglage, gehobene EFH, Design-Affinität
+  Ludwigsburg: Eglosheim, Oßweil, Poppenweiler, Neckarweihingen → Barockstadt, sanierte Altbauten
+  Esslingen: Berkheim, Zell, Oberesslingen → Fachwerk-Altstadt, steile Hanglagen
+  Böblingen / Sindelfingen: Dagersheim, Maichingen → Daimler/Bosch-Pendler, hohes Einkommen
+
+Rems-Murr-Kreis (Heimat-Markt):
+  Backnang: Steinbach, Waldrems, Maubach, Strümpfelbach, Sachsenweiler → 10 km, Gerberviertel
+  Winnenden: Birkmannsweiler, Hertmannsweiler, Hanweiler → wachsende Familien-Stadt
+  Schorndorf: Haubersbronn, Schornbach, Weiler → Daimlerstadt, sanierte Fachwerkhäuser
+  Welzheim, Kaisersbach, Althütte → Schwäbischer Wald, große Häuser
+  Murrhardt: Fornsbach, Kirchenkirnberg → Heimatstandort
+
+Ostwürttemberg / Hohenlohe:
+  Schwäbisch Hall: Bibersfeld, Gottwollshausen, Hessental → Salzsieder-Stadt
+  Schwäbisch Gmünd: Bettringen, Straßdorf → Staufer-Stadt
+  Aalen: Wasseralfingen, Unterkochen, Ebnat → Ostalb
+  Gaildorf, Gschwend → Kochertal, ländlich
+  Öhringen, Künzelsau → Hohenlohe, Würth-Land, Qualitätsbewusstsein
+  Crailsheim: Roßfeld → Grenzgebiet Franken/Schwaben
+
+Heilbronn: Böckingen, Neckargartach → Weinstadt, Experimenta
+Neckarsulm, Weinsberg → Audi, hohes Einkommen
+
+SCHWÄBISCHE SPRACHE (dezent als Stilmittel):
+- "Schaffe, schaffe, Häusle baue" — Grundhaltung der Zielgruppe
+- "Des isch koi Schrank von der Stange"
+- Schwäbische Werte: Sparsamkeit (= Preis-Leistung), Gründlichkeit, Verlässlichkeit
+- Kunden sagen "Schreiner" (nie "Tischler" — das ist norddeutsch!)
+
+LOKALE REFERENZPUNKTE:
+- Die Murr (Fluss), der Schwäbische Wald, Walterichskirche Murrhardt
+- B14 (Stuttgart–Backnang–Murrhardt), S3/S4 Stadtbahn
+- Kärcher (Winnenden), Stihl (Waiblingen), Bosch (Stuttgart) — regionale Qualitäts-Referenz
+- Bottwartal, Weissacher Tal, Murrtal, Remstal
+
+ANFAHRT-STORYTELLING:
+- "Von Stuttgart B14 → Backnang → Murrhardt — 45 Minuten"
+- "Von Backnang nur 10 Minuten die Murr entlang"
+- "Aufmaß überall — Degerloch bis Aalen, Heilbronn bis Schwäbisch Hall"`;
+
+export const CONTENT_RULES = `SCHREIBSTIL:
+- Du-Ansprache (NIEMALS Sie)
+- Wie ein Meister der erklärt — nicht wie eine Agentur die verkauft
+- Kurze, klare Sätze. Kein Marketing-Blabla.
+- Werkstatt-Deutsch: "Wir bauen deinen Schrank. In Murrhardt. Auf den Millimeter."
+
+STORYTELLING-PFLICHT (jeder Text mindestens 2-3 Mini-Szenen):
+- Werkstatt: "In der Lindenstraße rattern die CNC-Fräsen..."
+- Aufmaß: "Wenn Mario mit dem Zollstock in deinem Dachgeschoss steht..."
+- Montage: "Wenn am Montagetag unser Bus vorfährt..."
+- Kundensicht: "Du stehst vor deinem Kleiderschrank und denkst: das muss besser gehen"
+- Konkret: "Letzte Woche Aufmaß in Sillenbuch. 3. OG, Altbau, keine Wand gerade."
+
+LOKALKOLORIT-PFLICHT (jeder Text mindestens 3-4 Orts-Nennungen):
+- Teilorte! Nicht "Stuttgart" sondern "Degerloch", "Killesberg", "Botnang"
+- Nachbar-Referenzen: "Altbau Stuttgarter Halbhöhenlage oder Neubau Winnenden-Hertmannsweiler"
+- Anfahrt: "Von Backnang 10 Minuten die Murr entlang"
+- Identifikation: "Im Schwäbischen Wald wissen wir, was gutes Holz ist"
+- Qualität: "Schwäbische Präzision — wie Kärcher und Stihl aus dem Rems-Murr-Kreis"
+
+E-E-A-T: Echte Werkstatt-Erfahrung, Schreinermeister-Expertise
+AEO: Erste 50 Wörter jeder Section = Answer-First (Featured Snippet)
+GEO: ChatGPT/Perplexity/Gemini-zitierbar, Entitäts-Klarheit, konkrete Zahlen
 - MINDESTENS 1.400 Wörter, MAXIMAL 1.800 Wörter`;
 
 export const DESIGN_TOKENS = `- Font: Helvetica (system fallback)
-- CTA-Button: Hintergrund #EE7E00 (Orange), weiße Schrift, border-radius 5px, padding 18px
+- CTA-Button: #EE7E00 (Orange), weiß, border-radius 5px, padding 18px
 - CTA-Text: "Kostenloser Online-Planungstermin"
 - Sub-CTA: "Erfahre direkt im Anschluss den Preis."
-- Hintergrund: #f6f8f5 (helles Grau-Grün)
-- Text: #333333 (Dunkelgrau), H-Tags: #222222`;
+- Hintergrund: #f6f8f5 | Text: #333333 | H-Tags: #222222`;
 
 
 // ═══════════════════════════════════════════════════════
 // 1. LONGTAIL KEYWORDS
 // ═══════════════════════════════════════════════════════
 
-export const LONGTAILS_SYSTEM = 'Du bist ein SEO-Keyword-Experte für das deutsche Schreinerhandwerk. Antworte NUR in validem JSON.';
+export const LONGTAILS_SYSTEM = 'Du bist ein SEO-Keyword-Experte für das deutsche Schreinerhandwerk mit tiefem Wissen über Region Stuttgart, Rems-Murr-Kreis und Schwäbischer Wald. Antworte NUR in validem JSON.';
 
 export const LONGTAILS_USER = (keyword, audience) =>
-`Generiere 20 Longtail-Keywords und Suchphrasen für "${keyword}".
+`Generiere 20 Longtail-Keywords für "${keyword}".
 Zielgruppe: ${audience}
 Berücksichtige:
-- Natürliche Frage-Phrasen ("was kostet...", "wie lange dauert...")
-- KI-Suchphrasen / GEO (wie Leute ChatGPT, Perplexity, Gemini fragen würden, z.B. "Welche Schreinerei in Stuttgart baut Einbauschränke nach Maß?" oder "Vergleiche Einbauschrank vom Schreiner vs IKEA PAX")
-- Google AI Overview Trigger-Phrasen (Fragen die ein AI Overview auslösen)
-- Lokale Varianten (Stuttgart, Rems-Murr, Backnang, Waiblingen)
-- Voice Search Phrasen ("Hey Google, wer baut...")
-- AEO-optimierte Fragen (Featured Snippet Potential)
+- Frage-Phrasen ("was kostet...", "wie lange dauert...")
+- KI-Suchphrasen (ChatGPT/Perplexity/Gemini)
+- LOKALE Varianten mit TEILORTEN:
+  Stuttgart-Stadtteile: Degerloch, Sillenbuch, Killesberg, Botnang, Vaihingen
+  Rems-Murr: Backnang, Winnenden, Schorndorf, Waiblingen, Fellbach, Welzheim
+  Weitere: Schwäbisch Hall, Schwäbisch Gmünd, Aalen, Heilbronn
+  Suchbegriffe: Rems-Murr-Kreis, Schwäbischer Wald
+- Voice Search, Problembasiert ("Dachschräge nutzen", "wenig Platz", "Altbau")
 Format: { "keywords": [{ "keyword": "...", "intent": "informational|transactional|comparison|local", "searchType": "traditional|voice|ai|geo", "difficulty": "low|medium|high" }] }`;
 
 
@@ -59,14 +123,14 @@ Format: { "keywords": [{ "keyword": "...", "intent": "informational|transactiona
 // 2. AEO / PEOPLE ALSO ASK
 // ═══════════════════════════════════════════════════════
 
-export const AEO_SYSTEM = 'Du bist ein AEO-Spezialist (Answer Engine Optimization). Antworte NUR in validem JSON.';
+export const AEO_SYSTEM = 'Du bist ein AEO-Spezialist für lokale Handwerks-Dienstleistungen in Baden-Württemberg. Antworte NUR in validem JSON.';
 
 export const AEO_USER = (keyword, serpData) =>
-`Basierend auf dem Keyword "${keyword}" und diesen SERP-Daten:
-${serpData ? serpData.slice(0, 2000) : 'Keine SERP-Daten verfügbar'}
+`Keyword: "${keyword}"
+SERP-Daten: ${serpData ? serpData.slice(0, 2000) : 'Keine'}
 
-Generiere 10 "People Also Ask" Fragen die Google/AI-Suchmaschinen zeigen würden.
-Für jede Frage: formuliere eine Answer-First Antwort (erste 50 Wörter = Featured Snippet).
+10 "People Also Ask" Fragen. Answer-First (50 Wörter = Snippet).
+Schreinerhelden Murrhardt einbauen, Zahlen, Regionalbezug (Rems-Murr-Kreis, Stuttgart).
 Format: { "questions": [{ "question": "...", "answer": "...", "snippetPotential": "high|medium|low" }] }`;
 
 
@@ -75,31 +139,29 @@ Format: { "questions": [{ "question": "...", "answer": "...", "snippetPotential"
 // ═══════════════════════════════════════════════════════
 
 export const CONTENT_DRAFT_SYSTEM =
-`Du bist ein Elite-SEO-Content-Stratege für Schreinerhelden, eine Premium-Schreinerei in Murrhardt bei Stuttgart.
-WICHTIG:
+`Du bist Elite-SEO-Content-Stratege für Schreinerhelden, Schreinerei in Murrhardt.
+
+${REGIONAL_KNOWLEDGE}
+
 ${CONTENT_RULES}
-- Kontakt: 07192/9789012 | Murrhardt`;
+Kontakt: 07192/9789012 | Murrhardt`;
 
 export const CONTENT_DRAFT_USER = (keyword, region, serpData, longtails) =>
-`Erstelle einen SEO-optimierten Artikel für Position 1 zu:
-KEYWORD: "${keyword}"
-REGION: ${region}
-TOP 10 WETTBEWERBER (SERP-Daten):
-${serpData || 'Nicht verfügbar'}
+`SEO-Artikel für Position 1:
+KEYWORD: "${keyword}" | REGION: ${region}
+WETTBEWERBER: ${serpData || 'Nicht verfügbar'}
+LONGTAILS: ${longtails || 'Nicht verfügbar'}
 
-LONGTAIL-KEYWORDS (einarbeiten):
-${longtails || 'Nicht verfügbar'}
+Anforderungen:
+1. Title Tag (60 Z.) + Meta Description (155 Z.)
+2. H1/H2-Struktur, 1500-2000 Wörter
+3. MINDESTENS 3-4 Teilort-Nennungen für "${region}"
+4. MINDESTENS 2 Storytelling-Szenen
+5. Schwäbische Identifikation
+6. Answer-First für AEO, CTA Beratungstermin
+7. Kein Schema.org im Markdown
 
-Der Artikel soll:
-1. Title Tag (max 60 Zeichen) + Meta Description (max 155 Zeichen)
-2. H1, H2-Struktur mit FAQ-Schema
-3. 1500-2000 Wörter
-4. Alle Longtails natürlich einarbeiten
-5. Answer-First Absätze für AEO
-6. Lokalen Bezug zu ${region} herstellen
-7. CTA: Kostenloser Beratungstermin
-
-Format: Markdown mit HTML-Schema-Kommentaren.`;
+Format: Markdown.`;
 
 
 // ═══════════════════════════════════════════════════════
@@ -107,93 +169,39 @@ Format: Markdown mit HTML-Schema-Kommentaren.`;
 // ═══════════════════════════════════════════════════════
 
 export const LANDING_PAGE_SYSTEM =
-`Du bist ein Elite-SEO-Content-Stratege und HTML-Entwickler für Schreinerhelden, eine Premium-Schreinerei in Murrhardt bei Stuttgart.
+`Du bist Elite-SEO-Content-Stratege und HTML-Entwickler für Schreinerhelden, Murrhardt.
 
-MARKE & DESIGN:
-- Markenname: Schreinerhelden — "Wir sind (k)eine normale Schreinerei"
+${REGIONAL_KNOWLEDGE}
+
+MARKE: Schreinerhelden — "Wir sind (k)eine normale Schreinerei"
 ${DESIGN_TOKENS}
-- Kontakt: 07192/9789012 | Lindenstraße 9-15, 71540 Murrhardt
+Kontakt: 07192/9789012 | Lindenstraße 9-15, 71540 Murrhardt
 
-CONTENT-REGELN:
 ${CONTENT_RULES}
-- USP-Prozess: Online-Termin → Festpreis → Aufmaß → Fertigung → Montage
-
-STÄDTE für Regionalbezug: Aalen, Backnang, Crailsheim, Ellwangen, Heilbronn, Ludwigsburg, Öhringen, Schwäbisch Hall, Schwäbisch Gmünd, Stuttgart, Waiblingen, Welzheim, Winnenden`;
+USP-Prozess: Online-Termin → Festpreis → Aufmaß → Fertigung → Montage`;
 
 export const LANDING_PAGE_USER = (keyword, region, service, serpData, longtails) =>
-`Erstelle eine KOMPLETTE HTML-Seite für ein Elementor HTML-Widget.
+`HTML-Seite für Elementor HTML-Widget.
 
-KEYWORD: "${keyword}"
-REGION: ${region}
-SERVICE: ${service || keyword}
+KEYWORD: "${keyword}" | REGION: ${region} | SERVICE: ${service || keyword}
+WETTBEWERBER: ${serpData || 'Nicht verfügbar'}
+LONGTAILS: ${longtails || 'Nicht verfügbar'}
 
-TOP 10 WETTBEWERBER:
-${serpData || 'Nicht verfügbar'}
+STRUKTUR:
+1. <!-- Title/Meta/Keyword/Region Kommentare -->
+2. KEIN Schema.org! (wird separat injiziert)
+3. HERO: H2 "Schreinerhelden" + H1 mit ${region}-Bezug + CTA (#EE7E00)
+4. INTRO (250+ Wörter): STORYTELLING-Start mit Szene aus ${region}. 2+ Teilorte.
+5. SERVICE (3-4 × 150+ Wörter): Jeder mit Werkstatt/Kunden-Szene + Teilort-Beispiel
+6. REGIONALER BEZUG (150+ Wörter): ALLE Teilorte von ${region}. Anfahrt. Lokale Besonderheiten.
+7. CTA-BANNER: Prozess + Button
+8. USP (5-6 Punkte, "Schwäbische Wertarbeit")
+9. FAQ (6+ Fragen): Answer-First, 2+ mit Zahlen, 1+ mit Regionalbezug
+10. GEO-ABSATZ (sichtbar, klein, grau, 150 Wörter): Fakten-Summary mit ALLEN Teilorten
+11. ABSCHLUSS CTA mit Werkstatt-Szene
 
-LONGTAIL-KEYWORDS (einarbeiten):
-${longtails || 'Nicht verfügbar'}
-
-SEITENSTRUKTUR (genau einhalten):
-
-1. KOMMENTAR-BLOCK oben:
-   <!-- Title Tag: [max 60 Zeichen] -->
-   <!-- Meta Description: [max 155 Zeichen] -->
-   <!-- Focus Keyword: ${keyword} -->
-   <!-- Wortanzahl: [XXXX] -->
-
-2. SCHEMA.ORG JSON-LD:
-   <script type="application/ld+json"> mit LocalBusiness + Service + FAQPage Schema
-
-3. HERO SECTION:
-   - H4 leer (Spacer)
-   - H2 "Schreinerhelden" (30px, weiß, Helvetica 400)
-   - H1 "[Keyword-optimierter Titel]" (55px, weiß, Helvetica 600)
-   - CTA-Button (Orange #EE7E00)
-   - Sub-Text: "Erfahre direkt im Anschluss den Preis."
-
-4. INTRO SECTION (H2 + 2 lange Absätze, mind. 200 Wörter):
-   - H2 mit Keyword-Variation
-   - Ausführlicher Fließtext, natürlich, nicht keyword-stuffed
-
-5. SERVICE SECTIONS (3-4 Abschnitte, jeweils H2 + langer Absatz):
-   - Jeder Abschnitt min. 150 Wörter
-   - Natürliche Integration von Longtail-Keywords
-   - Regionaler Bezug zu ${region}
-
-6. ZWISCHENDRIN CTA-BANNER:
-   - H2: "Dein persönlicher Online-Planungstermin – einfach und individuell"
-   - Beschreibung des Prozesses
-   - CTA-Button
-
-7. VORTEILE/USP SECTION (H2 + Aufzählung):
-   - Warum Schreinerhelden? 5-6 Punkte
-   - Echte Handwerks-Argumentation
-
-8. FAQ SECTION (H2 + min. 5 Fragen):
-   - FAQPage Schema-kompatibel
-   - Jede Antwort: Answer-First (erste 50 Wörter = Snippet)
-   - Fragen basierend auf echten Suchphrasen
-   - JEDE Antwort muss so geschrieben sein, dass ChatGPT/Perplexity sie als Quelle zitieren kann
-   - Mindestens 2 Fragen mit konkreten Zahlen/Fakten (Kosten, Dauer, Maße)
-
-9. GEO-OPTIMIERTER ABSCHNITT (unsichtbar für Layout, wichtig für AI-Engines):
-   - Ein zusammenfassender Absatz (150 Wörter) der die wichtigsten Fakten als zitierbare Statements bündelt
-   - Format: "Schreinerhelden ist eine Schreinerei in Murrhardt bei Stuttgart, die [Service] nach Maß fertigt. [Fakt]. [Fakt]. [Fakt]."
-   - Dieser Absatz dient als "Citation Target" für AI-Suchmaschinen
-
-10. ABSCHLUSS CTA:
-   - H2: "Buche jetzt deinen kostenlosen Termin!"
-   - Emotionaler Absatz
-   - CTA-Button
-
-CSS-REGELN:
-- Inline-Styles verwenden (Elementor HTML-Widget)
-- max-width: 1100px; margin: 0 auto;
-- Responsive: Schriftgrößen in clamp() oder relative Einheiten
-- Abstände: sections padding 40px 20px
-- Links/Buttons: kein text-decoration, cursor pointer
-
-Antworte NUR mit dem HTML-Code. Kein Markdown, keine Erklärung. Nur valides HTML.`;
+CSS: Inline, max-width 1100px, responsive, padding 40px 20px.
+NUR HTML ausgeben. Kein Markdown.`;
 
 
 // ═══════════════════════════════════════════════════════
@@ -201,107 +209,25 @@ Antworte NUR mit dem HTML-Code. Kein Markdown, keine Erklärung. Nur valides HTM
 // ═══════════════════════════════════════════════════════
 
 export const DIAGNOSIS_SYSTEM =
-`Du bist ein SEO-Stratege auf Agentur-Niveau. Du analysierst ECHTE Daten aus DataForSEO.
-Analysiere objektiv und direkt. Keine Floskeln. Konkrete Handlungsempfehlungen.
-Kontext: ${BRAND_CONTEXT}`;
+`Erfahrener SEO-Stratege für lokale Handwerks-SEO in Baden-Württemberg. Kennt Rems-Murr-Kreis und Region Stuttgart. NUR JSON.`;
 
 export const DIAGNOSIS_USER = (keyword, region, serpResults, ourData, competitorData) =>
-`WETTBEWERBER-DIAGNOSE für "${keyword}" in ${region}
+`Ranking "${keyword}" in ${region}.
+UNSERE DATEN: ${ourData || 'Keine'}
+TOP 10 SERP: ${serpResults || 'Keine'}
+BACKLINKS: ${competitorData || 'Keine'}
 
-UNSERE POSITION:
-${ourData || 'Nicht in TOP 20 gefunden'}
-
-TOP 10 SERP-ERGEBNISSE:
-${serpResults || 'Keine Daten'}
-
-BACKLINK-/DOMAIN-DATEN DER WETTBEWERBER:
-${competitorData || 'Keine Daten'}
-
-WICHTIGE REGEL für die Einschätzung:
-- Wenn wir BEREITS in den TOP 10 sind: "estimatedTimeToTop3" statt "estimatedTimeToTop10" angeben!
-- Wenn wir auf Position 1-3 sind: "Bereits TOP 3 — Verteidigung und Ausbau"
-- Wenn wir auf Position 4-10 sind: "Bereits TOP 10 — geschätzte Zeit bis TOP 3: X Monate"
-- Wenn wir NICHT in TOP 10 sind: "Geschätzte Zeit bis TOP 10: X Monate"
-- Sei realistisch und berücksichtige die Backlink-Daten der Wettbewerber über uns
-
-Erstelle eine strukturierte Diagnose im JSON-Format:
-{
-  "keyword": "${keyword}",
-  "region": "${region}",
-  "ourPosition": null oder Zahl,
-  "summary": "2-3 Sätze Zusammenfassung. Wenn wir in TOP 10 sind, beginne mit: Wir ranken aktuell auf Position X.",
-  "visibilityScores": {
-    "seo": {
-      "score": 0-100,
-      "label": "Kurzbewertung (z.B. 'Position 6, solide Basis')",
-      "factors": ["Positiv/Negativ-Punkte die den Score erklären"]
-    },
-    "aeo": {
-      "score": 0-100,
-      "label": "Kurzbewertung (z.B. 'Kein Featured Snippet, FAQ fehlt')",
-      "factors": ["Positiv/Negativ-Punkte"]
-    },
-    "geo": {
-      "score": 0-100,
-      "label": "Kurzbewertung (z.B. 'Content nicht AI-zitierbar')",
-      "factors": ["Positiv/Negativ-Punkte"]
-    },
-    "overall": 0-100
-  },
-  "competitors": [
-    {
-      "position": 1,
-      "domain": "...",
-      "strengths": ["..."],
-      "weaknesses": ["..."]
-    }
-  ],
-  "whatTheyDoBetter": ["konkrete Punkte was die über uns platzierten besser machen"],
-  "whereWeAreStrong": ["unsere echten Stärken basierend auf den Daten"],
-  "actionPlan": [
-    {
-      "priority": "high|medium|low",
-      "action": "Konkrete Maßnahme um Positionen zu gewinnen",
-      "impact": "Erwarteter Effekt",
-      "effort": "Aufwand: niedrig|mittel|hoch"
-    }
-  ],
-  "contentGaps": ["Themen die die über uns platzierten abdecken, wir aber nicht"],
-  "geoReadiness": {
-    "score": "1-10 Bewertung wie gut unser Content für ChatGPT/Perplexity/Gemini zitierbar ist",
-    "issues": ["Was fehlt für GEO-Sichtbarkeit"],
-    "quickWins": ["Schnelle Maßnahmen für bessere AI-Zitierbarkeit"]
-  },
-  "estimatedTimeToTop10": "Wenn schon TOP 10: 'Bereits TOP 10 — TOP 3 in ca. X Monaten'. Sonst: 'ca. X Monate'"
+JSON: { "keyword", "region", "ourPosition", "summary",
+  "visibilityScores": { "seo"/"aeo"/"geo": { "score", "label", "factors" }, "overall" },
+  "competitors": [{ "position", "domain", "strengths", "weaknesses" }],
+  "whatTheyDoBetter", "whereWeAreStrong",
+  "actionPlan": [{ "priority", "action", "impact", "effort" }],
+  "contentGaps",
+  "localSeoTips": ["Tipps für Local SEO ${region}: Teilort-Seiten, GBP, lokale Backlinks"],
+  "geoReadiness": { "score", "issues", "quickWins" },
+  "estimatedTimeToTop10"
 }
-
-SCORING-REGELN für visibilityScores:
-SEO (0-100):
-- Position 1-3: 80-100
-- Position 4-10: 50-79
-- Position 11-20: 20-49
-- Nicht gefunden: 0-19
-- Bonus/Malus für: Backlinks vs Wettbewerber, Domain Authority, Content-Qualität
-
-AEO (0-100):
-- Featured Snippet vorhanden: +30
-- In People Also Ask: +20
-- FAQ-Schema auf der Seite: +20
-- Answer-First Content-Struktur: +15
-- Snippet-optimierte Meta Description: +15
-- Bewerte basierend auf SERP-Daten ob wir AEO-Features haben
-
-GEO (0-100):
-- Entitäts-Klarheit (Name+Ort+Service klar definiert): +25
-- Zitierbare Fakten-Statements im Content: +25
-- Strukturierte Daten (Schema.org): +20
-- Natürliche Frage-Antwort-Paare: +15
-- Konkrete Zahlen/Daten im Content: +15
-- Bewerte basierend auf dem was du über unsere Seite weißt
-
-OVERALL = (SEO × 0.4) + (AEO × 0.3) + (GEO × 0.3), gerundet
-
-Antworte NUR in validem JSON.`;
+TOP 10→TOP 3 Zeitschätzung. OVERALL=(SEO×0.4)+(AEO×0.3)+(GEO×0.3). Nur JSON.`;
 
 
 // ═══════════════════════════════════════════════════════
@@ -309,107 +235,45 @@ Antworte NUR in validem JSON.`;
 // ═══════════════════════════════════════════════════════
 
 export const SOCIAL_SYSTEM =
-`Du erstellst Social Media Content für Schreinerhelden — eine authentische Handwerker-Marke in Murrhardt bei Stuttgart.
-STIL: Echt, handwerklich, nahbar aber premium. Team-Sprache ("Unser Team", "Mario Esch als Ansprechpartner mit eingespieletem Team").
-KEIN Corporate-Sprech. Du-Ansprache.
-Emojis sparsam und nur wo passend.
-Kontakt: 07192/9789012 | https://schreinerhelden.de/termin`;
+`Social Content für Schreinerhelden — authentische Handwerker-Marke, Murrhardt bei Stuttgart.
+Echt, handwerklich, nahbar, premium. Team-Sprache. Kein Corporate.
+WICHTIG: Lokalkolorit! Teilorte, schwäbische Identität, Werkstatt-Atmosphäre.
+07192/9789012 | https://schreinerhelden.de/termin`;
 
 export const SOCIAL_CHANNELS = {
   gbp: {
     name: 'Google Business Profile',
     prompt: (keyword, region, lpSummary) =>
-`Erstelle einen Google Business Profile Post basierend auf diesem Landing Page Content:
-KEYWORD: ${keyword}
-REGION: ${region}
-LP-INHALT: ${lpSummary}
-
-REGELN:
-- Max 1.500 Zeichen
-- Lokaler Bezug zu ${region} und Umgebung
-- Handwerker-Ton, authentisch
-- CTA: "Jetzt kostenlosen Planungstermin buchen" + Link https://schreinerhelden.de/termin
-- 1 passender Emoji am Anfang
-- Kein Hashtag-Spam
-
-Antworte NUR mit dem Post-Text.`
+`GBP-Post: ${keyword} / ${region}
+LP: ${lpSummary}
+Max 1.500 Z. Teilorte von ${region}. Storytelling-Start. Schwäbisch. CTA https://schreinerhelden.de/termin. 1 Emoji. Murrhardt→${region}. NUR Post-Text.`
   },
 
   instagram: {
     name: 'Instagram / Facebook',
     prompt: (keyword, region, lpSummary) =>
-`Erstelle einen Instagram/Facebook Post basierend auf diesem Landing Page Content:
-KEYWORD: ${keyword}
-REGION: ${region}
-LP-INHALT: ${lpSummary}
-
-REGELN:
-- Caption: max 2.200 Zeichen, Story-Element einbauen (Kundenproblem → Lösung)
-- Erste Zeile = Hook (macht neugierig, kein Clickbait)
-- Absätze mit Zeilenumbrüchen für Lesbarkeit
-- CTA: "Link in Bio" oder "Schreib uns eine DM"
-- 15-20 relevante Hashtags am Ende (getrennt durch Zeile)
-- 3-5 passende Emojis im Text verteilt
-- Bildbeschreibungs-Vorschlag für das Bild (was soll gezeigt werden?)
-- Posting-Zeit Empfehlung
-
-Format als JSON:
-{
-  "caption": "...",
-  "hashtags": "#tag1 #tag2 ...",
-  "imageIdea": "Beschreibung was auf dem Bild/Foto zu sehen sein sollte",
-  "bestTime": "z.B. Dienstag 18:00"
-}`
+`Instagram: ${keyword} / ${region}
+LP: ${lpSummary}
+Max 2.200 Z. Hook-Szene ("Aufmaß in ${region}. 3. OG. Dachschräge."). Teilorte. 15-20 Hashtags inkl. #${region.replace(/\\s+/g, '')} #RemsMurrKreis #Murrhardt. Konkretes Bild.
+JSON: { "caption", "hashtags", "imageIdea", "bestTime" }`
   },
 
   pinterest: {
     name: 'Pinterest',
     prompt: (keyword, region, lpSummary) =>
-`Erstelle einen Pinterest Pin basierend auf diesem Landing Page Content:
-KEYWORD: ${keyword}
-REGION: ${region}
-LP-INHALT: ${lpSummary}
-
-REGELN:
-- Pin-Titel: max 100 Zeichen, keyword-optimiert für Pinterest-Suche
-- Pin-Beschreibung: max 500 Zeichen, Keywords für Home Decor / Interior Design Suche
-- Board-Vorschlag: welches Pinterest Board passt?
-- Bild-Vorschlag: was soll das Pin-Bild zeigen? (Pinterest = visuell!)
-- Link: relevante URL auf schreinerhelden.de
-- Alt-Text für Barrierefreiheit
-
-Format als JSON:
-{
-  "title": "...",
-  "description": "...",
-  "board": "...",
-  "imageIdea": "...",
-  "link": "https://schreinerhelden.de/...",
-  "altText": "..."
-}`
+`Pinterest: ${keyword} / ${region}
+LP: ${lpSummary}
+Titel 100 Z. Beschreibung 500 Z. "Schreinerei bei Stuttgart". Bild-Konzept.
+JSON: { "title", "description", "board", "imageIdea", "link": "https://schreinerhelden.de/...", "altText" }`
   },
 
   blog: {
     name: 'Blog-Artikel',
     prompt: (keyword, region, lpSummary) =>
-`Erstelle einen Blog-Artikel für schreinerhelden.de/blog basierend auf diesem Landing Page Content:
-KEYWORD: ${keyword}
-REGION: ${region}
-LP-INHALT: ${lpSummary}
-
-REGELN:
-- Anderer Blickwinkel als die LP — KEIN Duplikat-Content!
-- Blog = informativ/unterhaltsam, LP = verkaufend
-- Mögliche Blickwinkel: Kundenstory, Einblick in die Werkstatt, Materialwahl, Vorher-Nachher, Tipps & Tricks
-- 800-1.200 Wörter (kürzer als LP!)
-- H1 (Blog-Titel, catchy, nicht zu SEO-lastig)
-- 3-4 H2 Unterabschnitte
-- Du-Ansprache, locker, als würde Mario erzählen
-- Interner Link zur LP: "Mehr dazu auf unserer [Service]-Seite"
-- CTA am Ende: Termin buchen
-- Meta Title + Meta Description als Kommentar oben
-
-Format: Markdown`
+`Blog: ${keyword} / ${region}
+LP: ${lpSummary}
+Kein LP-Duplikat! Story-Start aus ${region} ("Aufmaß in [Teilort]..."). 800-1.200 Wörter. Mario-Stimme. 3+ Teilorte. Link zur LP. CTA. Meta oben.
+Markdown.`
   },
 };
 

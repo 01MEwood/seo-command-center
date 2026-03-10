@@ -149,3 +149,14 @@ export const promptSave = (key, value) =>
 
 export const promptReset = (key) =>
   request(`/prompts/${key}`, { method: 'DELETE' });
+
+// ── Schema.org ──
+export const schemaGenerate = (keyword, region, domain, types, options = {}) =>
+  request('/schema/generate', {
+    method: 'POST',
+    body: { keyword, region, domain, types, ...options },
+    timeout: 60000,
+  });
+
+export const schemaValidate = (jsonld) =>
+  request('/schema/validate', { method: 'POST', body: { jsonld } });

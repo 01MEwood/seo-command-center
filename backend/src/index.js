@@ -18,6 +18,7 @@ import citationRoutes from './routes/citations.js';
 import pagespeedRoutes from './routes/pagespeed.js';
 import domainRoutes from './routes/domains.js';
 import promptRoutes from './routes/prompts.js';
+import schemaRoutes from './routes/schema.js';
 
 import { startCronJobs } from './cron/gsc.js';
 import { log } from './services/logger.js';
@@ -52,6 +53,7 @@ app.use('/api/citations', citationRoutes);
 app.use('/api/pagespeed', pagespeedRoutes);
 app.use('/api/domains', domainRoutes);
 app.use('/api/prompts', promptRoutes);
+app.use('/api/schema', schemaRoutes);
 
 // Also handle /health for Docker healthcheck
 app.get('/health', async (req, res) => {
