@@ -8,6 +8,7 @@ import LoginScreen from './components/LoginScreen';
 import Layout from './components/Layout';
 import Dashboard from './modules/Dashboard';
 import Analyse from './modules/Analyse';
+import Diagnose from './modules/Diagnose';
 import Keywords from './modules/Keywords';
 import Content from './modules/Content';
 import Tracking from './modules/Tracking';
@@ -22,6 +23,7 @@ export default function App() {
   const modules = {
     dashboard: Dashboard,
     analyse: Analyse,
+    diagnose: Diagnose,
     keywords: Keywords,
     content: Content,
     tracking: Tracking,

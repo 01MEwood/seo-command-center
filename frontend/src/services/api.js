@@ -70,6 +70,12 @@ export const pipelineRescan = (id) =>
 export const aiContent = (keyword, context, template = 'article') =>
   request('/ai/content', { method: 'POST', body: { keyword, context, template }, timeout: 90000 });
 
+export const aiLandingPage = (keyword, region, service, domain = 'sh') =>
+  request('/ai/landing-page', { method: 'POST', body: { keyword, region, service, domain }, timeout: 180000 });
+
+export const aiCompetitorDiagnosis = (keyword, region) =>
+  request('/ai/competitor-diagnosis', { method: 'POST', body: { keyword, region }, timeout: 120000 });
+
 export const aiLongtails = (seedKeyword, domain = 'sh') =>
   request('/ai/longtails', { method: 'POST', body: { seedKeyword, domain } });
 
