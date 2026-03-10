@@ -1,18 +1,19 @@
-name: Ship-It Deploy SEO Command Center v5
+name: Build & Deploy SEO Command Center
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 env:
-  APP_NAME: seo-command-center
+  FRONTEND_IMAGE: memario/seo-command-center-frontend
+  BACKEND_IMAGE: memario/seo-command-center-backend
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -20,37 +21,43 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push backend
+      - name: Build & Push Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}-backend:latest
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
-      - name: Build and push frontend
+      - name: Build & Push Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}-frontend:latest
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
 
-      - name: Deploy to Hostinger
-        uses: hostinger/deploy-on-vps@v2
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
         with:
-          api-key: ${{ secrets.HOSTINGER_API_KEY }}
-          virtual-machine: 1042525
-          project-name: ${{ env.APP_NAME }}
-          environment-variables: |
-            NODE_ENV=production
-            PORT=4000
-            DB_NAME=seo_command
-            DB_USER=seoadmin
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            CORS_ORIGIN=https://seo.meosapp.de
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-            GOOGLE_REFRESH_TOKEN=${{ secrets.GOOGLE_REFRESH_TOKEN }}
-            DATAFORSEO_LOGIN=${{ secrets.DATAFORSEO_LOGIN }}
-            DATAFORSEO_PASSWORD=${{ secrets.DATAFORSEO_PASSWORD }}
-            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            mkdir -p /opt/backups
+            cd /opt/seo-command-center
+            echo "=== Backup DB ==="
+            docker-compose exec -T db pg_dump -U seoadmin seo_command > /opt/backups/seo_pre_deploy_$(date +%Y%m%d_%H%M%S).sql 2>/dev/null || true
+            echo "=== Pull ==="
+            docker-compose pull
+            echo "=== Restart ==="
+            docker-compose up -d
+            echo "=== Health ==="
+            sleep 10
+            curl -sf http://localhost:4000/health && echo " Backend OK" || echo " Backend FAIL"
