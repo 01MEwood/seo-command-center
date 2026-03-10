@@ -1,3 +1,8 @@
+# ═══════════════════════════════════════════════════════
+# MEOS:SEO v5.5.4 — docker-compose.yml
+# Auf dem VPS: git pull && docker-compose up -d --build
+# ═══════════════════════════════════════════════════════
+
 services:
   db:
     image: postgres:16-alpine
@@ -17,24 +22,17 @@ services:
       - seo_net
 
   backend:
+    build: ./backend
     image: memario/seo-command-center-backend:latest
     restart: always
     depends_on:
       db:
         condition: service_healthy
+    env_file: .env
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: production
       PORT: 4000
       DATABASE_URL: postgresql://${DB_USER:-seoadmin}:${DB_PASSWORD:-changeme}@db:5432/${DB_NAME:-seo_command}
-      CORS_ORIGIN: ${CORS_ORIGIN:-https://seo.meosapp.de}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN:-}
-      DATAFORSEO_LOGIN: ${DATAFORSEO_LOGIN:-}
-      DATAFORSEO_PASSWORD: ${DATAFORSEO_PASSWORD:-}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      JWT_SECRET: ${JWT_SECRET:-changeme}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
       interval: 30s
@@ -45,14 +43,20 @@ services:
       - seo_net
 
   frontend:
+    build: ./frontend
     image: memario/seo-command-center-frontend:latest
     restart: always
     depends_on:
       - backend
-    ports:
-      - "80:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.seo.rule=Host(`seo.meosapp.de`)"
+      - "traefik.http.routers.seo.entrypoints=websecure"
+      - "traefik.http.routers.seo.tls.certresolver=myresolver"
+      - "traefik.http.services.seo.loadbalancer.server.port=80"
     networks:
       - seo_net
+      - root_default
 
 volumes:
   seo_pgdata:
@@ -60,3 +64,5 @@ volumes:
 networks:
   seo_net:
     driver: bridge
+  root_default:
+    external: true
