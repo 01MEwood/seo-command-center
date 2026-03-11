@@ -1,22 +1,55 @@
-import { useState } from 'react';
+import { useState, Component } from 'react';
 import { Card, Btn, Input, Select, Spinner, EmptyState, ErrorBox, Badge } from '../components/ui';
 import * as api from '../services/api';
 import { REGIONS } from '../config/constants';
 
-export default function Diagnose() {
+// ── ErrorBoundary: fängt jeden Render-Crash ab ──
+class DiagnoseBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error: error.message }; }
+  componentDidCatch(err, info) { console.error('Diagnose Render-Crash:', err, info); }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Diagnose</h2>
+            <p className="text-gray-500 text-sm mt-1">Wettbewerber-Analyse mit echten SERP- und Backlink-Daten (DataForSEO + GPT-4o)</p>
+          </div>
+          <Card>
+            <div className="bg-red-900/20 border border-red-800/40 rounded-lg p-4">
+              <p className="text-red-400 font-medium text-sm mb-2">Render-Fehler abgefangen</p>
+              <p className="text-gray-400 text-xs mb-3">{this.state.error}</p>
+              <Btn variant="secondary" size="sm" onClick={() => this.setState({ error: null })}>
+                Nochmal versuchen
+              </Btn>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function DiagnoseInner() {
   const [keyword, setKeyword] = useState('');
   const [region, setRegion] = useState('Stuttgart');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [rawJson, setRawJson] = useState(null);
   const [error, setError] = useState(null);
 
   const run = async () => {
     if (!keyword.trim()) return;
-    setLoading(true); setError(null); setResult(null);
+    setLoading(true); setError(null); setResult(null); setRawJson(null);
     try {
       const data = await api.aiCompetitorDiagnosis(keyword, region);
-      setResult(data);
-    } catch (e) { setError(e.message); }
+      setRawJson(JSON.stringify(data, null, 2));
+      setResult(normalizeResult(data));
+    } catch (e) {
+      setError(e.message || 'Unbekannter Fehler');
+    }
     setLoading(false);
   };
 
@@ -97,9 +130,9 @@ export default function Diagnose() {
               </div>
               <div className="flex-1">
                 <h3 className="text-white font-semibold">
-                  {result.keyword} — {result.region}
+                  {result.keyword || keyword} — {result.region || region}
                 </h3>
-                <p className="text-gray-400 text-sm mt-1 leading-relaxed">{result.summary}</p>
+                <p className="text-gray-400 text-sm mt-1 leading-relaxed">{result.summary || 'Keine Zusammenfassung verfügbar'}</p>
                 {result.estimatedTimeToTop10 && (
                   <p className="text-gray-600 text-xs mt-2">
                     Geschätzte Zeit bis TOP 10: <span className="text-blue-400">{result.estimatedTimeToTop10}</span>
@@ -116,42 +149,42 @@ export default function Diagnose() {
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-gray-400 text-xs uppercase tracking-wider">Gesamt-Sichtbarkeit</span>
                   <span className={`text-3xl font-bold ${
-                    result.visibilityScores.overall >= 70 ? 'text-emerald-400' :
-                    result.visibilityScores.overall >= 40 ? 'text-yellow-400' : 'text-red-400'
-                  }`}>{result.visibilityScores.overall}<span className="text-gray-600 text-lg">/100</span></span>
+                    (result.visibilityScores.overall || 0) >= 70 ? 'text-emerald-400' :
+                    (result.visibilityScores.overall || 0) >= 40 ? 'text-yellow-400' : 'text-red-400'
+                  }`}>{result.visibilityScores.overall || 0}<span className="text-gray-600 text-lg">/100</span></span>
                 </div>
                 <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full transition-all ${
-                    result.visibilityScores.overall >= 70 ? 'bg-emerald-500' :
-                    result.visibilityScores.overall >= 40 ? 'bg-yellow-500' : 'bg-red-500'
-                  }`} style={{ width: `${result.visibilityScores.overall}%` }} />
+                    (result.visibilityScores.overall || 0) >= 70 ? 'bg-emerald-500' :
+                    (result.visibilityScores.overall || 0) >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`} style={{ width: `${result.visibilityScores.overall || 0}%` }} />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { key: 'seo', label: 'SEO', icon: '🔍', color: 'blue' },
-                  { key: 'aeo', label: 'AEO', icon: '🤖', color: 'purple' },
-                  { key: 'geo', label: 'GEO', icon: '🌐', color: 'cyan' },
-                ].map(({ key, label, icon, color }) => {
+                  { key: 'seo', label: 'SEO', icon: '🔍' },
+                  { key: 'aeo', label: 'AEO', icon: '🤖' },
+                  { key: 'geo', label: 'GEO', icon: '🌐' },
+                ].map(({ key, label, icon }) => {
                   const s = result.visibilityScores[key];
-                  if (!s) return null;
-                  const scoreColor = s.score >= 70 ? '#34d399' : s.score >= 40 ? '#fbbf24' : '#f87171';
+                  if (!s || typeof s.score === 'undefined') return null;
+                  const score = Number(s.score) || 0;
+                  const scoreColor = score >= 70 ? '#34d399' : score >= 40 ? '#fbbf24' : '#f87171';
                   return (
                     <div key={key} className="bg-gray-800/40 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-white text-sm font-semibold">{icon} {label}</span>
-                        <span className="text-xl font-bold" style={{ color: scoreColor }}>{s.score}</span>
+                        <span className="text-xl font-bold" style={{ color: scoreColor }}>{score}</span>
                       </div>
-                      {/* Circular-ish progress */}
                       <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden mb-2">
-                        <div className="h-full rounded-full" style={{ width: `${s.score}%`, backgroundColor: scoreColor }} />
+                        <div className="h-full rounded-full" style={{ width: `${score}%`, backgroundColor: scoreColor }} />
                       </div>
-                      <p className="text-gray-500 text-xs">{s.label}</p>
-                      {s.factors?.length > 0 && (
+                      <p className="text-gray-500 text-xs">{s.label || ''}</p>
+                      {Array.isArray(s.factors) && s.factors.length > 0 && (
                         <div className="mt-2 space-y-0.5">
                           {s.factors.slice(0, 3).map((f, i) => (
-                            <div key={i} className="text-gray-600 text-[10px]">• {f}</div>
+                            <div key={i} className="text-gray-600 text-[10px]">• {String(f)}</div>
                           ))}
                         </div>
                       )}
@@ -163,7 +196,7 @@ export default function Diagnose() {
           )}
 
           {/* SERP Results (echte Daten) */}
-          {result.rawSerp && (
+          {Array.isArray(result.rawSerp) && result.rawSerp.length > 0 && (
             <Card title="TOP 10 SERP (Live-Daten)">
               <div className="space-y-1">
                 {result.rawSerp.map((r, i) => (
@@ -171,11 +204,11 @@ export default function Diagnose() {
                     r.isOurs ? 'bg-emerald-900/15 border border-emerald-800/30' : 'hover:bg-gray-800/20'
                   } transition-colors`}>
                     <span className={`w-6 text-center font-bold text-sm ${
-                      r.isOurs ? 'text-emerald-400' : r.position <= 3 ? 'text-yellow-400' : 'text-gray-600'
-                    }`}>{r.position}</span>
+                      r.isOurs ? 'text-emerald-400' : (r.position || 99) <= 3 ? 'text-yellow-400' : 'text-gray-600'
+                    }`}>{r.position || '?'}</span>
                     <div className="flex-1 min-w-0">
-                      <div className={`text-sm truncate ${r.isOurs ? 'text-emerald-400 font-medium' : 'text-white'}`}>{r.title}</div>
-                      <div className="text-gray-600 text-xs truncate">{r.domain}</div>
+                      <div className={`text-sm truncate ${r.isOurs ? 'text-emerald-400 font-medium' : 'text-white'}`}>{r.title || 'Kein Titel'}</div>
+                      <div className="text-gray-600 text-xs truncate">{r.domain || ''}</div>
                     </div>
                     {r.isOurs && <Badge color="green">UNSERE</Badge>}
                   </div>
@@ -185,13 +218,13 @@ export default function Diagnose() {
           )}
 
           {/* Was machen die besser? */}
-          {result.whatTheyDoBetter?.length > 0 && (
+          {Array.isArray(result.whatTheyDoBetter) && result.whatTheyDoBetter.length > 0 && (
             <Card title="⚠️ Was die TOP 3 besser machen">
               <div className="space-y-2">
                 {result.whatTheyDoBetter.map((point, i) => (
                   <div key={i} className="flex items-start gap-3 py-2 px-3 bg-red-900/10 border border-red-800/20 rounded-lg">
                     <span className="text-red-400 mt-0.5">✗</span>
-                    <span className="text-gray-300 text-sm">{point}</span>
+                    <span className="text-gray-300 text-sm">{String(point)}</span>
                   </div>
                 ))}
               </div>
@@ -199,13 +232,13 @@ export default function Diagnose() {
           )}
 
           {/* Wo sind wir stark? */}
-          {result.whereWeAreStrong?.length > 0 && (
+          {Array.isArray(result.whereWeAreStrong) && result.whereWeAreStrong.length > 0 && (
             <Card title="✅ Unsere Stärken">
               <div className="space-y-2">
                 {result.whereWeAreStrong.map((point, i) => (
                   <div key={i} className="flex items-start gap-3 py-2 px-3 bg-emerald-900/10 border border-emerald-800/20 rounded-lg">
                     <span className="text-emerald-400 mt-0.5">✓</span>
-                    <span className="text-gray-300 text-sm">{point}</span>
+                    <span className="text-gray-300 text-sm">{String(point)}</span>
                   </div>
                 ))}
               </div>
@@ -213,11 +246,11 @@ export default function Diagnose() {
           )}
 
           {/* Content Gaps */}
-          {result.contentGaps?.length > 0 && (
+          {Array.isArray(result.contentGaps) && result.contentGaps.length > 0 && (
             <Card title="📝 Content Gaps (Themen die uns fehlen)">
               <div className="flex flex-wrap gap-2">
                 {result.contentGaps.map((gap, i) => (
-                  <Badge key={i} color="purple">{gap}</Badge>
+                  <Badge key={i} color="purple">{String(gap)}</Badge>
                 ))}
               </div>
             </Card>
@@ -228,28 +261,28 @@ export default function Diagnose() {
             <Card title="🌐 GEO-Readiness (AI-Suchmaschinen Sichtbarkeit)">
               <div className="flex items-center gap-4 mb-4">
                 <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
-                  result.geoReadiness.score >= 7 ? 'bg-emerald-900/30 text-emerald-400' :
-                  result.geoReadiness.score >= 4 ? 'bg-yellow-900/30 text-yellow-400' :
+                  (Number(result.geoReadiness.score) || 0) >= 7 ? 'bg-emerald-900/30 text-emerald-400' :
+                  (Number(result.geoReadiness.score) || 0) >= 4 ? 'bg-yellow-900/30 text-yellow-400' :
                   'bg-red-900/30 text-red-400'
-                }`}>{result.geoReadiness.score}/10</div>
+                }`}>{result.geoReadiness.score || 0}/10</div>
                 <p className="text-gray-400 text-sm">Wie gut ist unser Content für ChatGPT, Perplexity, Gemini und Google AI Overviews zitierbar?</p>
               </div>
-              {result.geoReadiness.issues?.length > 0 && (
+              {Array.isArray(result.geoReadiness.issues) && result.geoReadiness.issues.length > 0 && (
                 <div className="mb-3">
                   <span className="text-red-400/70 text-xs block mb-2">Probleme:</span>
                   {result.geoReadiness.issues.map((issue, i) => (
                     <div key={i} className="flex items-start gap-2 py-1 text-sm text-gray-400">
-                      <span className="text-red-400">✗</span> {issue}
+                      <span className="text-red-400">✗</span> {String(issue)}
                     </div>
                   ))}
                 </div>
               )}
-              {result.geoReadiness.quickWins?.length > 0 && (
+              {Array.isArray(result.geoReadiness.quickWins) && result.geoReadiness.quickWins.length > 0 && (
                 <div>
                   <span className="text-emerald-400/70 text-xs block mb-2">Quick Wins:</span>
                   {result.geoReadiness.quickWins.map((win, i) => (
                     <div key={i} className="flex items-start gap-2 py-1 text-sm text-gray-400">
-                      <span className="text-emerald-400">→</span> {win}
+                      <span className="text-emerald-400">→</span> {String(win)}
                     </div>
                   ))}
                 </div>
@@ -258,7 +291,7 @@ export default function Diagnose() {
           )}
 
           {/* Action Plan */}
-          {result.actionPlan?.length > 0 && (
+          {Array.isArray(result.actionPlan) && result.actionPlan.length > 0 && (
             <Card title="🎯 Maßnahmenplan">
               <div className="space-y-2">
                 {result.actionPlan.map((action, i) => (
@@ -266,11 +299,11 @@ export default function Diagnose() {
                     borderColor: action.priority === 'high' ? '#ef4444' : action.priority === 'medium' ? '#eab308' : '#22c55e'
                   }}>
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge color={priorityColors[action.priority] || 'gray'}>{action.priority}</Badge>
-                      <span className="text-white text-sm font-medium">{action.action}</span>
+                      <Badge color={priorityColors[action.priority] || 'gray'}>{action.priority || '?'}</Badge>
+                      <span className="text-white text-sm font-medium">{action.action || 'Keine Aktion'}</span>
                     </div>
                     <div className="text-gray-500 text-xs">
-                      Impact: {action.impact} · Aufwand: {action.effort}
+                      Impact: {action.impact || '?'} · Aufwand: {action.effort || '?'}
                     </div>
                   </div>
                 ))}
@@ -279,26 +312,26 @@ export default function Diagnose() {
           )}
 
           {/* Competitor Details */}
-          {result.competitors?.length > 0 && (
+          {Array.isArray(result.competitors) && result.competitors.length > 0 && (
             <Card title="Wettbewerber im Detail">
               <div className="space-y-3">
                 {result.competitors.map((comp, i) => (
                   <div key={i} className="bg-gray-800/30 rounded-lg p-4">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-gray-600 font-bold text-sm w-6 text-center">{comp.position}</span>
-                      <span className="text-white text-sm font-medium">{comp.domain}</span>
+                      <span className="text-gray-600 font-bold text-sm w-6 text-center">{comp.position || '?'}</span>
+                      <span className="text-white text-sm font-medium">{comp.domain || 'Unbekannt'}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
                         <span className="text-emerald-400/70 block mb-1">Stärken:</span>
-                        {comp.strengths?.map((s, j) => (
-                          <div key={j} className="text-gray-400 py-0.5">+ {s}</div>
+                        {Array.isArray(comp.strengths) && comp.strengths.map((s, j) => (
+                          <div key={j} className="text-gray-400 py-0.5">+ {String(s)}</div>
                         ))}
                       </div>
                       <div>
                         <span className="text-red-400/70 block mb-1">Schwächen:</span>
-                        {comp.weaknesses?.map((w, j) => (
-                          <div key={j} className="text-gray-400 py-0.5">− {w}</div>
+                        {Array.isArray(comp.weaknesses) && comp.weaknesses.map((w, j) => (
+                          <div key={j} className="text-gray-400 py-0.5">− {String(w)}</div>
                         ))}
                       </div>
                     </div>
@@ -307,15 +340,99 @@ export default function Diagnose() {
               </div>
             </Card>
           )}
+
+          {/* Debug: Raw JSON (aufklappbar) */}
+          {rawJson && (
+            <details className="text-xs">
+              <summary className="text-gray-600 cursor-pointer hover:text-gray-400 py-2">
+                🔧 Debug: Rohes API-Ergebnis anzeigen
+              </summary>
+              <pre className="bg-gray-900 border border-gray-800 rounded-lg p-4 overflow-x-auto text-gray-500 mt-1 max-h-96 overflow-y-auto">
+                {rawJson}
+              </pre>
+            </details>
+          )}
         </>
       )}
 
-      {!result && !loading && (
+      {!result && !loading && !error && (
         <Card>
           <EmptyState icon="⚔️" title="Wettbewerber-Diagnose"
             desc="Echte SERP- und Backlink-Daten aus DataForSEO + GPT-4o Analyse: Was machen die besser? Wo sind wir stark? Was tun?" />
         </Card>
       )}
     </div>
+  );
+}
+
+// ── Normalize: stellt sicher dass alle Properties sicher sind ──
+function normalizeResult(data) {
+  if (!data || typeof data !== 'object') return { summary: 'Ungültige Antwort vom Server' };
+
+  return {
+    keyword: data.keyword || '',
+    region: data.region || '',
+    ourPosition: data.ourPosition ?? null,
+    summary: data.summary || '',
+    estimatedTimeToTop10: data.estimatedTimeToTop10 || null,
+
+    visibilityScores: data.visibilityScores ? {
+      overall: Number(data.visibilityScores.overall) || 0,
+      seo: normalizeScoreBlock(data.visibilityScores.seo),
+      aeo: normalizeScoreBlock(data.visibilityScores.aeo),
+      geo: normalizeScoreBlock(data.visibilityScores.geo),
+    } : null,
+
+    rawSerp: Array.isArray(data.rawSerp) ? data.rawSerp.map(r => ({
+      position: r.position || r.rank_group || null,
+      domain: r.domain || '',
+      title: r.title || '',
+      url: r.url || '',
+      isOurs: !!r.isOurs,
+    })) : [],
+
+    competitors: Array.isArray(data.competitors) ? data.competitors.map(c => ({
+      position: c.position || null,
+      domain: c.domain || '',
+      strengths: Array.isArray(c.strengths) ? c.strengths : [],
+      weaknesses: Array.isArray(c.weaknesses) ? c.weaknesses : [],
+    })) : [],
+
+    whatTheyDoBetter: Array.isArray(data.whatTheyDoBetter) ? data.whatTheyDoBetter : [],
+    whereWeAreStrong: Array.isArray(data.whereWeAreStrong) ? data.whereWeAreStrong : [],
+    contentGaps: Array.isArray(data.contentGaps) ? data.contentGaps : [],
+
+    actionPlan: Array.isArray(data.actionPlan) ? data.actionPlan.map(a => ({
+      priority: a.priority || 'medium',
+      action: a.action || '',
+      impact: a.impact || '',
+      effort: a.effort || '',
+    })) : [],
+
+    geoReadiness: data.geoReadiness ? {
+      score: Number(data.geoReadiness.score) || 0,
+      issues: Array.isArray(data.geoReadiness.issues) ? data.geoReadiness.issues : [],
+      quickWins: Array.isArray(data.geoReadiness.quickWins) ? data.geoReadiness.quickWins : [],
+    } : null,
+
+    localSeoTips: Array.isArray(data.localSeoTips) ? data.localSeoTips : [],
+  };
+}
+
+function normalizeScoreBlock(block) {
+  if (!block || typeof block !== 'object') return null;
+  return {
+    score: Number(block.score) || 0,
+    label: block.label || '',
+    factors: Array.isArray(block.factors) ? block.factors : [],
+  };
+}
+
+// ── Export mit ErrorBoundary ──
+export default function Diagnose(props) {
+  return (
+    <DiagnoseBoundary>
+      <DiagnoseInner {...props} />
+    </DiagnoseBoundary>
   );
 }
